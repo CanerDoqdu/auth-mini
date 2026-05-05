@@ -143,7 +143,19 @@ export default function LoginPage() {
 
           <div className="route-chip-row" aria-label="Login route story">
             <span className="route-chip route-chip-active">/login</span>
+            <span className="route-chip">/signup</span>
             <span className="route-chip">/profile</span>
+          </div>
+
+          <div className="surface-muted auth-route-note">
+            <p className="preview-card-label">Route cues</p>
+            <p>
+              Lead the live story with <strong>/login</strong>, point to{" "}
+              <strong>/signup</strong> for fresh accounts, and finish in{" "}
+              <strong>/profile</strong>. The <strong>/register</strong> and{" "}
+              <strong>/dashboard</strong> aliases still work when older links need to
+              land cleanly.
+            </p>
           </div>
 
           <div className="auth-quick-grid">

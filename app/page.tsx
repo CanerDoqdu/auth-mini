@@ -163,6 +163,12 @@ export default function HomePage() {
               <span className="route-chip">/signup</span>
               <span className="route-chip">/profile</span>
             </div>
+            <p className="hero-support-copy">
+              Canonical presentation path: <strong>/login</strong> -&gt;{" "}
+              <strong>/signup</strong> -&gt; <strong>/profile</strong>. Compatibility
+              aliases <strong>/register</strong> and <strong>/dashboard</strong>{" "}
+              stay live for existing links and demos.
+            </p>
 
             <div className="preview-card hero-note-card">
               <p className="preview-card-label">Demo credentials</p>
