@@ -64,3 +64,28 @@ test("demo auth surfaces expose presentation-ready copy and seeded guidance", ()
   assert.match(globalStyles, /\.demo-credentials-card/);
   assert.match(globalStyles, /\.profile-status-banner/);
 });
+
+test("demo auth screens stay wired to the repaired route contract", () => {
+  const loginSource = readProjectFile(["app", "login", "page.tsx"]);
+  const signupScreenSource = readProjectFile(["app", "signup", "signup-screen.tsx"]);
+  const registerSource = readProjectFile(["app", "register", "page.tsx"]);
+  const profileScreenSource = readProjectFile(["app", "profile", "profile-screen.tsx"]);
+  const logoutSource = readProjectFile(["app", "profile", "logout-button.tsx"]);
+
+  assert.match(loginSource, /fetch\("\/api\/login"/);
+  assert.match(loginSource, /router\.replace\("\/profile"\)/);
+  assert.match(loginSource, /router\.refresh\(\)/);
+
+  assert.match(signupScreenSource, /fetch\("\/api\/signup"/);
+  assert.match(
+    signupScreenSource,
+    /const protectedRouteHref = isRegisterRoute \? "\/dashboard" : "\/profile";/,
+  );
+  assert.match(signupScreenSource, /router\.replace\(protectedRouteHref\)/);
+  assert.match(registerSource, /SignupScreen variant="register"/);
+
+  assert.match(profileScreenSource, /redirectPath: getSessionCleanupPath\("\/login"\)/);
+  assert.match(profileScreenSource, /<LogoutButton \/>/);
+  assert.match(logoutSource, /fetch\("\/api\/logout"/);
+  assert.match(logoutSource, /router\.replace\("\/login"\)/);
+});

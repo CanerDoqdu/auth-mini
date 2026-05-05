@@ -9,8 +9,10 @@
     "lint": "eslint",
     "test": "node tests/run-tests.mjs",
     "test:auth": "npm test -- tests/core/auth.test.ts",
+    "test:demo-ui": "npm test -- tests/core/demo-ui.test.ts",
     "test:homepage": "npm test -- tests/core/homepage.test.ts",
-    "checkpoint:quality": "npm run lint && npm run build && npm test -- tests/core/auth.test.ts tests/core/homepage.test.ts"
+    "test:route-level": "npm test -- tests/core/turn_the_repaired_demo_into_a_safe_handoff_by_adding_route_level.test.ts",
+    "checkpoint:quality": "npm run lint && npm run build && npm test -- tests/core/auth.test.ts tests/core/homepage.test.ts tests/core/demo-ui.test.ts tests/core/turn_the_repaired_demo_into_a_safe_handoff_by_adding_route_level.test.ts"
   },
   "dependencies": {
     "bcrypt": "^6.0.0",
