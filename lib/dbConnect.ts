@@ -1,17 +1,48 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
-const MONGO_URI = process.env.MONGO_URI;
+type MongooseCache = {
+  conn: typeof mongoose | null;
+  promise: Promise<typeof mongoose> | null;
+};
+
+const globalForMongoose = globalThis as typeof globalThis & {
+  mongooseCache?: MongooseCache;
+};
+
+const mongooseCache = globalForMongoose.mongooseCache ?? {
+  conn: null,
+  promise: null,
+};
+
+globalForMongoose.mongooseCache = mongooseCache;
+
+export function getMongoUri(env: NodeJS.ProcessEnv = process.env) {
+  const mongoUri = env.MONGO_URI ?? env.MONGODB_URI;
+
+  if (!mongoUri) {
+    throw new Error(
+      "Please define the MONGO_URI or MONGODB_URI environment variable.",
+    );
+  }
+
+  return mongoUri;
+}
 
 export default async function dbConnect() {
-    if (mongoose.connection.readyState >= 1) {
-         return   mongoose.connection.asPromise();
-    }
-    
-    if (!MONGO_URI) {
-        throw new Error('Please define the MONGO_URI enviroment varible inside .env');
-    } 
-    
-   
+  if (mongooseCache.conn) {
+    return mongooseCache.conn;
+  }
 
-  return await  mongoose.connect(MONGO_URI) ;
+  if (!mongooseCache.promise) {
+    mongooseCache.promise = mongoose.connect(getMongoUri());
+  }
+
+  try {
+    mongooseCache.conn = await mongooseCache.promise;
+    return mongooseCache.conn;
+  } catch (error) {
+    console.error("Database connection error:", error);
+    mongooseCache.promise = null;
+    throw error;
+  }
 }

@@ -14,18 +14,18 @@ export default function LoginPage() {
   const [touched, setTouched] = useState<Record<string, boolean>>({});
 
   const errors: Record<string, string> = {};
-  
-  if (touched.username && !username) errors.username = "Username is required";
-  if (touched.password && !password) errors.password = "Password is required";
+  const usernameTrimmed = username.trim();
+  const passwordTrimmed = password.trim();
+
+  if (touched.username && !usernameTrimmed) errors.username = "Username is required";
+  if (touched.password && !passwordTrimmed) errors.password = "Password is required";
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    
-    // Mark all fields as touched
+
     setTouched({ username: true, password: true });
-    
     setError(null);
-    
+
     if (Object.keys(errors).length > 0) {
       return;
     }
@@ -36,7 +36,10 @@ export default function LoginPage() {
       const res = await fetch("/api/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }),
+        body: JSON.stringify({
+          username: usernameTrimmed,
+          password: passwordTrimmed,
+        }),
       });
 
       const data = await res.json();
@@ -44,9 +47,11 @@ export default function LoginPage() {
       if (!res.ok) {
         setError(data.message || "Login failed");
       } else {
-        router.push("/profile");
+        router.replace("/profile");
+        router.refresh();
       }
-    } catch {
+    } catch (error) {
+      console.error("Login request failed:", error);
       setError("Network error. Please try again.");
     } finally {
       setLoading(false);

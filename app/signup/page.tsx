@@ -23,21 +23,22 @@ export default function SignupPage() {
   };
 
   const errors: Record<string, string> = {};
-  
-  if (touched.username && !username) errors.username = "Username is required";
-  if (touched.email && !email) errors.email = "Email is required";
-  if (touched.email && email && !validateEmail(email)) errors.email = "Invalid email format";
-  if (touched.password && !password) errors.password = "Password is required";
-  if (touched.password && password && !validatePassword(password)) errors.password = "Password must be at least 6 characters";
+  const usernameTrimmed = username.trim();
+  const emailTrimmed = email.trim().toLowerCase();
+  const passwordTrimmed = password.trim();
+
+  if (touched.username && !usernameTrimmed) errors.username = "Username is required";
+  if (touched.email && !emailTrimmed) errors.email = "Email is required";
+  if (touched.email && emailTrimmed && !validateEmail(emailTrimmed)) errors.email = "Invalid email format";
+  if (touched.password && !passwordTrimmed) errors.password = "Password is required";
+  if (touched.password && passwordTrimmed && !validatePassword(passwordTrimmed)) errors.password = "Password must be at least 6 characters";
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    
-    // Mark all fields as touched
+
     setTouched({ username: true, email: true, password: true });
-    
     setError(null);
-    
+
     if (Object.keys(errors).length > 0) {
       return;
     }
@@ -48,7 +49,11 @@ export default function SignupPage() {
       const res = await fetch("/api/signup", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, email, password }),
+        body: JSON.stringify({
+          username: usernameTrimmed,
+          email: emailTrimmed,
+          password: passwordTrimmed,
+        }),
       });
 
       const data = await res.json();
@@ -56,9 +61,11 @@ export default function SignupPage() {
       if (!res.ok) {
         setError(data.message || "Signup failed");
       } else {
-        router.push("/login");
+        router.replace("/profile");
+        router.refresh();
       }
-    } catch {
+    } catch (error) {
+      console.error("Signup request failed:", error);
       setError("Network error. Please try again.");
     } finally {
       setLoading(false);
