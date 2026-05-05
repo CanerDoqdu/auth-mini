@@ -77,6 +77,21 @@ test("User.login authenticates the seeded demo account from a local store", asyn
   }
 });
 
+test("User.login authenticates the seeded guest account from a local store", async () => {
+  const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "auth-mini-guest-login-"));
+  const env = { AUTH_USER_STORE_FILE: path.join(tempRoot, "users.json") };
+
+  try {
+    await dbConnect(env);
+    const user = await User.login("guest", "guest123", env);
+
+    assert.equal(user.username, "guest");
+    assert.equal(user.email, "guest@authmini.dev");
+  } finally {
+    fs.rmSync(tempRoot, { force: true, recursive: true });
+  }
+});
+
 test("User.signup persists new local users and rejects duplicate credentials", async () => {
   const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "auth-mini-signup-"));
   const env = { AUTH_USER_STORE_FILE: path.join(tempRoot, "users.json") };

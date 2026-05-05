@@ -73,6 +73,9 @@ npm test -- tests/core/demo-ui.test.ts
 npm test -- tests/core/auth.test.ts
 npm test -- tests/core/homepage.test.ts
 npm test -- tests/core/turn_the_repaired_demo_into_a_safe_handoff_by_adding_route_level.test.ts
+npm test -- tests/core/lock_the_repaired_demo_with_focused_tests_and_exact_presentation.test.ts
+npm test -- tests/core/refresh_the_focused_docs_and_regression_coverage_so_the_final_se.test.ts
+npm run checkpoint:quality
 ```
 
 ## Notes
@@ -80,3 +83,4 @@ npm test -- tests/core/turn_the_repaired_demo_into_a_safe_handoff_by_adding_rout
 - The app persists users in a local JSON store, so no MongoDB setup is required for the demo.
 - Session validation clears stale JWT cookies when the token or user is invalid.
 - The homepage remains server-rendered and build-budget checked for the presentation path.
+- The focused test runner accepts either repo-relative or absolute test file paths, which keeps the `npm test -- tests/core/<module>.test.ts` QA commands portable on Windows shells.
