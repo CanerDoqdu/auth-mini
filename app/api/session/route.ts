@@ -1,32 +1,80 @@
-import { clearAuthCookie, verifyAuthToken } from "@/lib/auth";
+import { clearAuthCookie, getAuthTokenState } from "@/lib/auth";
 import { AUTH_COOKIE_NAME } from "@/lib/authCookie";
 import dbConnect from "@/lib/dbConnect";
 import User from "@/models/User";
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 
-export async function GET() {
+function getSessionRedirectTarget(request: Request) {
+  const redirectTo = new URL(request.url).searchParams.get("redirectTo");
+
+  if (!redirectTo || !redirectTo.startsWith("/")) {
+    return null;
+  }
+
+  return redirectTo;
+}
+
+function createSessionFailureResponse({
+  clearCookie,
+  message,
+  request,
+  status,
+}: {
+  clearCookie: boolean;
+  message: string;
+  request: Request;
+  status: number;
+}) {
+  const redirectTo = getSessionRedirectTarget(request);
+
+  if (redirectTo) {
+    const response = NextResponse.redirect(new URL(redirectTo, request.url));
+    return clearCookie ? clearAuthCookie(response) : response;
+  }
+
+  const response = NextResponse.json(
+    { authenticated: false, message },
+    { status },
+  );
+
+  return clearCookie ? clearAuthCookie(response) : response;
+}
+
+export async function GET(request: Request) {
   const token = (await cookies()).get(AUTH_COOKIE_NAME)?.value;
-  if (!token) {
-    return NextResponse.json(
-      { authenticated: false, message: "No token provided." },
-      { status: 401 },
-    );
+  const authState = getAuthTokenState(token);
+
+  if (authState.status === "missing") {
+    return createSessionFailureResponse({
+      clearCookie: false,
+      message: "No token provided.",
+      request,
+      status: 401,
+    });
+  }
+
+  if (authState.status === "invalid") {
+    return createSessionFailureResponse({
+      clearCookie: true,
+      message: "Invalid token.",
+      request,
+      status: 401,
+    });
   }
 
   try {
-    const decoded = verifyAuthToken(token);
     await dbConnect();
 
-    const user = await User.findById(decoded.userId);
+    const user = await User.findById(authState.payload.userId);
 
     if (!user) {
-      return clearAuthCookie(
-        NextResponse.json(
-          { authenticated: false, message: "User not found." },
-          { status: 401 },
-        ),
-      );
+      return createSessionFailureResponse({
+        clearCookie: true,
+        message: "User not found.",
+        request,
+        status: 401,
+      });
     }
 
     return NextResponse.json(
@@ -37,24 +85,13 @@ export async function GET() {
       { status: 200 },
     );
   } catch (error) {
-    const err = error as Error;
     console.error("Session error:", error);
-
-    const response = NextResponse.json(
+    return NextResponse.json(
       {
         authenticated: false,
-        message:
-          err.message === "Invalid token."
-            ? "Invalid token."
-            : "Unable to load session.",
+        message: "Unable to load session.",
       },
-      { status: err.message === "Invalid token." ? 401 : 500 },
+      { status: 500 },
     );
-
-    if (err.message === "Invalid token.") {
-      return clearAuthCookie(response);
-    }
-
-    return response;
   }
 }

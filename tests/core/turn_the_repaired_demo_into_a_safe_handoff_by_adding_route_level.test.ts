@@ -7,6 +7,7 @@ import test from "node:test";
 
 import { NextRequest } from "next/server";
 
+import { signAuthToken } from "../../lib/auth";
 import { AUTH_COOKIE_NAME } from "../../lib/authCookie";
 
 type ModuleInternals = {
@@ -271,10 +272,15 @@ test("login and session routes reject invalid credentials and stale tokens", asy
     assert.match(getSetCookieHeader(successfulLoginResponse), /^token=/i);
 
     const { GET: getSession } = loadProjectModule<{
-      GET: () => Promise<Response>;
+      GET: (request: Request) => Promise<Response>;
     }>(["app", "api", "session", "route.ts"], { cookieValue: "invalid-token" });
 
-    const invalidSessionResponse = await getSession();
+    const invalidSessionResponse = await getSession(
+      new Request("http://localhost:3000/api/session"),
+    );
+    const invalidSessionRedirectResponse = await getSession(
+      new Request("http://localhost:3000/api/session?redirectTo=%2Flogin"),
+    );
 
     assert.equal(invalidSessionResponse.status, 401);
     assert.deepEqual(await invalidSessionResponse.json(), {
@@ -285,6 +291,16 @@ test("login and session routes reject invalid credentials and stale tokens", asy
       getSetCookieHeader(invalidSessionResponse),
       /Expires=Thu, 01 Jan 1970 00:00:00 GMT/i,
     );
+
+    assert.equal(invalidSessionRedirectResponse.status, 307);
+    assert.equal(
+      invalidSessionRedirectResponse.headers.get("location"),
+      "http://localhost:3000/login",
+    );
+    assert.match(
+      getSetCookieHeader(invalidSessionRedirectResponse),
+      /Expires=Thu, 01 Jan 1970 00:00:00 GMT/i,
+    );
   });
 });
 
@@ -292,18 +308,27 @@ test("proxy enforces guest and authenticated route access at the route level", (
   const { proxy } = loadProjectModule<{
     proxy: (request: NextRequest) => Response;
   }>(["proxy.ts"]);
+  const validToken = signAuthToken({
+    userId: "demo-user-id",
+    username: demoUsername,
+  });
 
   const unauthenticatedProfileResponse = proxy(
     new NextRequest("http://localhost:3000/profile"),
   );
   const authenticatedLoginResponse = proxy(
     new NextRequest("http://localhost:3000/login", {
-      headers: { cookie: `${AUTH_COOKIE_NAME}=demo-token` },
+      headers: { cookie: `${AUTH_COOKIE_NAME}=${validToken}` },
     }),
   );
   const steadyStateProfileResponse = proxy(
     new NextRequest("http://localhost:3000/profile", {
-      headers: { cookie: `${AUTH_COOKIE_NAME}=demo-token` },
+      headers: { cookie: `${AUTH_COOKIE_NAME}=${validToken}` },
+    }),
+  );
+  const invalidGuestResponse = proxy(
+    new NextRequest("http://localhost:3000/login", {
+      headers: { cookie: `${AUTH_COOKIE_NAME}=invalid-token` },
     }),
   );
 
@@ -322,4 +347,11 @@ test("proxy enforces guest and authenticated route access at the route level", (
   assert.equal(steadyStateProfileResponse.status, 200);
   assert.equal(steadyStateProfileResponse.headers.get("location"), null);
   assert.equal(steadyStateProfileResponse.headers.get("x-middleware-next"), "1");
+
+  assert.equal(invalidGuestResponse.status, 200);
+  assert.equal(invalidGuestResponse.headers.get("location"), null);
+  assert.match(
+    invalidGuestResponse.headers.get("set-cookie") ?? "",
+    /Expires=Thu, 01 Jan 1970 00:00:00 GMT/i,
+  );
 });

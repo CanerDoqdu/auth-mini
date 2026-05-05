@@ -4,7 +4,12 @@ import os from "node:os";
 import path from "node:path";
 import test from "node:test";
 
-import { signAuthToken, verifyAuthToken } from "../../lib/auth";
+import {
+  getAuthTokenState,
+  INVALID_AUTH_TOKEN_MESSAGE,
+  signAuthToken,
+  verifyAuthToken,
+} from "../../lib/auth";
 import {
   AUTH_COOKIE_NAME,
   AUTH_TOKEN_MAX_AGE_SECONDS,
@@ -132,51 +137,68 @@ test("signAuthToken falls back to the demo JWT secret when none is configured", 
 test("verifyAuthToken rejects invalid JWT strings", () => {
   assert.throws(
     () => verifyAuthToken("invalid-token", { JWT_SECRET: "test-secret" }),
-    /Invalid token\./,
+    new RegExp(INVALID_AUTH_TOKEN_MESSAGE),
   );
 });
 
-test("getAuthRedirectPath sends anonymous profile requests to login", () => {
+test("getAuthTokenState distinguishes missing invalid and authenticated tokens", () => {
+  const env = { JWT_SECRET: "test-secret" };
+  const payload = { userId: "user-123", username: "caner" };
+  const validToken = signAuthToken(payload, env);
+
+  assert.deepEqual(getAuthTokenState(undefined, env), { status: "missing" });
+  assert.deepEqual(getAuthTokenState("invalid-token", env), { status: "invalid" });
+  assert.deepEqual(getAuthTokenState(validToken, env), {
+    payload,
+    status: "authenticated",
+  });
+});
+
+test("getAuthRedirectPath sends unauthenticated profile requests to login", () => {
   assert.equal(
-    getAuthRedirectPath({ hasToken: false, pathname: "/profile" }),
+    getAuthRedirectPath({ authState: "missing", pathname: "/profile" }),
     "/login",
   );
   assert.equal(
-    getAuthRedirectPath({ hasToken: false, pathname: "/profile/settings" }),
+    getAuthRedirectPath({ authState: "invalid", pathname: "/profile/settings" }),
     "/login",
   );
   assert.equal(
-    getAuthRedirectPath({ hasToken: false, pathname: "/dashboard" }),
+    getAuthRedirectPath({ authState: "missing", pathname: "/dashboard" }),
     "/login",
   );
 });
 
 test("getAuthRedirectPath keeps authenticated users out of guest auth pages", () => {
   assert.equal(
-    getAuthRedirectPath({ hasToken: true, pathname: "/login" }),
-    "/dashboard",
+    getAuthRedirectPath({ authState: "authenticated", pathname: "/login" }),
+    "/profile",
   );
   assert.equal(
-    getAuthRedirectPath({ hasToken: true, pathname: "/signup" }),
-    "/dashboard",
+    getAuthRedirectPath({ authState: "authenticated", pathname: "/signup" }),
+    "/profile",
   );
   assert.equal(
-    getAuthRedirectPath({ hasToken: true, pathname: "/register" }),
-    "/dashboard",
+    getAuthRedirectPath({ authState: "authenticated", pathname: "/register" }),
+    "/profile",
   );
 });
 
 test("getAuthRedirectPath allows valid route access in steady-state sessions", () => {
   assert.equal(
-    getAuthRedirectPath({ hasToken: true, pathname: "/profile/security" }),
+    getAuthRedirectPath({ authState: "authenticated", pathname: "/profile/security" }),
     null,
   );
   assert.equal(
-    getAuthRedirectPath({ hasToken: false, pathname: "/login" }),
+    getAuthRedirectPath({ authState: "missing", pathname: "/login" }),
     null,
   );
   assert.equal(
-    getAuthRedirectPath({ hasToken: true, pathname: "/dashboard" }),
+    getAuthRedirectPath({ authState: "invalid", pathname: "/signup" }),
+    null,
+  );
+  assert.equal(
+    getAuthRedirectPath({ authState: "authenticated", pathname: "/dashboard" }),
     null,
   );
   assert.equal(AUTH_COOKIE_NAME, "token");
