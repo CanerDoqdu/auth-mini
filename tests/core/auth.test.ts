@@ -1,4 +1,7 @@
 import assert from "node:assert/strict";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
 import test from "node:test";
 
 import { signAuthToken, verifyAuthToken } from "../../lib/auth";
@@ -8,31 +11,89 @@ import {
   getAuthCookieOptions,
   getExpiredAuthCookieOptions,
 } from "../../lib/authCookie";
-import { getMongoUri } from "../../lib/dbConnect";
+import dbConnect, { getUserStoreFilePath } from "../../lib/dbConnect";
+import { getSeedUsers } from "../../lib/userStore";
+import User from "../../models/User";
 import { getAuthRedirectPath } from "../../proxy";
 
-test("getMongoUri prefers MONGO_URI and falls back to MONGODB_URI", () => {
+test("getUserStoreFilePath uses an override and defaults to the demo data path", () => {
+  const overridePath = path.join("C:", "temp", "users.json");
+
   assert.equal(
-    getMongoUri({
-      MONGO_URI: "mongodb://primary",
-      MONGODB_URI: "mongodb://fallback",
-    }),
-    "mongodb://primary",
+    getUserStoreFilePath({ AUTH_USER_STORE_FILE: overridePath }),
+    overridePath,
   );
 
   assert.equal(
-    getMongoUri({
-      MONGODB_URI: "mongodb://fallback",
-    }),
-    "mongodb://fallback",
+    getUserStoreFilePath({}),
+    path.join(process.cwd(), "data", "users.json"),
   );
 });
 
-test("getMongoUri throws when no database environment variable is defined", () => {
-  assert.throws(
-    () => getMongoUri({}),
-    /Please define the MONGO_URI or MONGODB_URI environment variable\./,
-  );
+test("dbConnect seeds a fresh local user store with demo accounts", async () => {
+  const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "auth-mini-store-"));
+  const userStoreFile = path.join(tempRoot, "users.json");
+
+  try {
+    const connection = await dbConnect({ AUTH_USER_STORE_FILE: userStoreFile });
+
+    assert.equal(connection.connected, true);
+    assert.equal(connection.storeFilePath, userStoreFile);
+
+    const fileContents = fs.readFileSync(userStoreFile, "utf8");
+    const parsed = JSON.parse(fileContents) as { users: Array<{ username: string }> };
+
+    assert.deepEqual(
+      parsed.users.map((user) => user.username),
+      getSeedUsers().map((user) => user.username),
+    );
+  } finally {
+    fs.rmSync(tempRoot, { force: true, recursive: true });
+  }
+});
+
+test("User.login authenticates the seeded demo account from a local store", async () => {
+  const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "auth-mini-login-"));
+  const env = { AUTH_USER_STORE_FILE: path.join(tempRoot, "users.json") };
+
+  try {
+    await dbConnect(env);
+    const user = await User.login("demo", "demo123", env);
+
+    assert.equal(user.username, "demo");
+    assert.equal(user.email, "demo@authmini.dev");
+  } finally {
+    fs.rmSync(tempRoot, { force: true, recursive: true });
+  }
+});
+
+test("User.signup persists new local users and rejects duplicate credentials", async () => {
+  const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "auth-mini-signup-"));
+  const env = { AUTH_USER_STORE_FILE: path.join(tempRoot, "users.json") };
+
+  try {
+    await dbConnect(env);
+
+    const createdUser = await User.signup(
+      "newdemo",
+      "newdemo@authmini.dev",
+      "secret123",
+      env,
+    );
+
+    const loadedUser = await User.findById(createdUser._id, env);
+
+    assert.equal(loadedUser?.username, "newdemo");
+    assert.equal(loadedUser?.email, "newdemo@authmini.dev");
+    assert.notEqual(loadedUser?.password, "secret123");
+
+    await assert.rejects(
+      () => User.signup("newdemo", "another@authmini.dev", "secret123", env),
+      /Username or email already exists\./,
+    );
+  } finally {
+    fs.rmSync(tempRoot, { force: true, recursive: true });
+  }
 });
 
 test("auth cookie helpers keep a consistent cookie contract", () => {
@@ -61,11 +122,11 @@ test("signAuthToken and verifyAuthToken round-trip the auth payload", () => {
   assert.deepEqual(verifyAuthToken(token, env), payload);
 });
 
-test("signAuthToken requires a JWT secret", () => {
-  assert.throws(
-    () => signAuthToken({ userId: "user-123", username: "caner" }, {}),
-    /Please define the JWT_SECRET environment variable\./,
-  );
+test("signAuthToken falls back to the demo JWT secret when none is configured", () => {
+  const payload = { userId: "user-123", username: "caner" };
+  const token = signAuthToken(payload, {});
+
+  assert.deepEqual(verifyAuthToken(token, {}), payload);
 });
 
 test("verifyAuthToken rejects invalid JWT strings", () => {

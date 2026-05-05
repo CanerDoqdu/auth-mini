@@ -17,14 +17,10 @@ export type AuthTokenPayload = {
   username: string;
 };
 
+const DEFAULT_DEMO_JWT_SECRET = "auth-mini-demo-local-jwt-secret";
+
 function getJwtSecret(env: NodeJS.ProcessEnv = process.env) {
-  const jwtSecret = env.JWT_SECRET;
-
-  if (!jwtSecret) {
-    throw new Error("Please define the JWT_SECRET environment variable.");
-  }
-
-  return jwtSecret;
+  return env.JWT_SECRET || DEFAULT_DEMO_JWT_SECRET;
 }
 
 export function signAuthToken(

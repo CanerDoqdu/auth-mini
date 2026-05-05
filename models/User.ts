@@ -1,61 +1,73 @@
-import mongoose from 'mongoose';
 import bcrypt from "bcrypt";
 
-interface IUser {
-  _id?: string;
+import {
+  createUser,
+  findUserById,
+  findUserByUsername,
+  type UserStoreEnv,
+} from "../lib/userStore";
+
+export interface IUser {
+  _id: string;
   username: string;
   email: string;
   password: string;
-  createdAt?: Date;
-  updatedAt?: Date;
+  createdAt: string;
+  updatedAt: string;
 }
 
-interface IUserMethods {
-  comparePassword(password: string): Promise<boolean>;
-}
+type SignupInput = {
+  username: string;
+  email: string;
+  password: string;
+};
 
-interface IUserStatics {
-  signup(username: string, email: string, password: string): Promise<IUser>;
-  login(username: string, password: string): Promise<IUser>;
-}
+const User = {
+  async signup(
+    username: string,
+    email: string,
+    password: string,
+    env?: UserStoreEnv,
+  ): Promise<IUser> {
+    const input: SignupInput = { username, email, password };
+    return createUser(input, env);
+  },
 
-type UserModel = mongoose.Model<IUser, Record<string, unknown>, IUserMethods> & IUserStatics;
+  async login(
+    username: string,
+    password: string,
+    env?: UserStoreEnv,
+  ): Promise<IUser> {
+    const user = await findUserByUsername(username, env);
 
-const userSchema = new mongoose.Schema<IUser, UserModel, IUserMethods>({
-    username: { type: String, required: true, unique: true },
-    email: { type: String, required: true, unique: true },
-    password: { type: String, required: true },
-}, { timestamps: true });
-
-    userSchema.pre("save", async function () { 
-    if (!this.isModified("password")) return;
+    if (!user) {
+      throw new Error("Invalid username or password");
+    }
 
     try {
-        const hashedPassword = await bcrypt.hash(this.password, 10);
-        this.password = hashedPassword;
-    } catch (err) {
-        throw err;
-    }
-    });
+      const isPasswordMatch = await bcrypt.compare(password, user.password);
 
-// Signup static method
-userSchema.statics.signup = async function (username: string, email: string, password: string) {
-    const user = new this({ username, email, password });
-    await user.save();
-    return user;
+      if (!isPasswordMatch) {
+        throw new Error("Invalid username or password");
+      }
+
+      return user;
+    } catch (error) {
+      if (
+        error instanceof Error &&
+        error.message === "Invalid username or password"
+      ) {
+        throw error;
+      }
+
+      console.error("Password verification error:", error);
+      throw error;
+    }
+  },
+
+  async findById(userId: string, env?: UserStoreEnv): Promise<IUser | null> {
+    return findUserById(userId, env);
+  },
 };
 
-// Login static method
-userSchema.statics.login = async function (username: string, password: string) {
-    const user = await this.findOne({ username });
-    if (!user) {
-        throw Error("Invalid username or password");
-    }
-    const match = await bcrypt.compare(password, user.password);
-    if (!match) {
-        throw Error("Invalid username or password");
-    }
-    return user;
-};
-
-export default (mongoose.models.User as mongoose.Model<IUser, Record<string, unknown>, IUserMethods> & IUserStatics) || mongoose.model<IUser, UserModel>("User", userSchema);
+export default User;

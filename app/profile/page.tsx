@@ -26,9 +26,7 @@ async function getSessionUser(): Promise<SessionUser | null> {
 
     await dbConnect();
 
-    const user = await User.findById(userId)
-      .select("_id username email")
-      .lean<{ username: string; email: string } | null>();
+    const user = await User.findById(userId);
 
     if (!user) {
       return null;

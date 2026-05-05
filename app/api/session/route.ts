@@ -1,11 +1,12 @@
 import { clearAuthCookie, verifyAuthToken } from "@/lib/auth";
+import { AUTH_COOKIE_NAME } from "@/lib/authCookie";
 import dbConnect from "@/lib/dbConnect";
 import User from "@/models/User";
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 
 export async function GET() {
-  const token = (await cookies()).get("token")?.value;
+  const token = (await cookies()).get(AUTH_COOKIE_NAME)?.value;
   if (!token) {
     return NextResponse.json(
       { authenticated: false, message: "No token provided." },
@@ -17,12 +18,12 @@ export async function GET() {
     const decoded = verifyAuthToken(token);
     await dbConnect();
 
-    const user = await User.findById(decoded.userId).select("_id username email");
+    const user = await User.findById(decoded.userId);
 
     if (!user) {
       return clearAuthCookie(
         NextResponse.json(
-        { authenticated: false, message: "User not found." },
+          { authenticated: false, message: "User not found." },
           { status: 401 },
         ),
       );

@@ -1,48 +1,24 @@
-import mongoose from "mongoose";
+import { ensureUserStore, getUserStoreFilePath } from "./userStore";
 
-type MongooseCache = {
-  conn: typeof mongoose | null;
-  promise: Promise<typeof mongoose> | null;
+type LocalStoreConnection = {
+  connected: true;
+  storeFilePath: string;
 };
 
-const globalForMongoose = globalThis as typeof globalThis & {
-  mongooseCache?: MongooseCache;
-};
+export { getUserStoreFilePath };
 
-const mongooseCache = globalForMongoose.mongooseCache ?? {
-  conn: null,
-  promise: null,
-};
-
-globalForMongoose.mongooseCache = mongooseCache;
-
-export function getMongoUri(env: NodeJS.ProcessEnv = process.env) {
-  const mongoUri = env.MONGO_URI ?? env.MONGODB_URI;
-
-  if (!mongoUri) {
-    throw new Error(
-      "Please define the MONGO_URI or MONGODB_URI environment variable.",
-    );
-  }
-
-  return mongoUri;
-}
-
-export default async function dbConnect() {
-  if (mongooseCache.conn) {
-    return mongooseCache.conn;
-  }
-
-  if (!mongooseCache.promise) {
-    mongooseCache.promise = mongoose.connect(getMongoUri());
-  }
-
+export default async function dbConnect(
+  env: NodeJS.ProcessEnv = process.env,
+): Promise<LocalStoreConnection> {
   try {
-    mongooseCache.conn = await mongooseCache.promise;
-    return mongooseCache.conn;
+    await ensureUserStore(env);
+
+    return {
+      connected: true,
+      storeFilePath: getUserStoreFilePath(env),
+    };
   } catch (error) {
-    console.error("Database connection error:", error);
-    mongooseCache.promise = null;
+    console.error("Local user store initialization error:", error);
     throw error;
   }
 }
