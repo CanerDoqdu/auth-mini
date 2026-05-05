@@ -4,6 +4,7 @@ import path from "node:path";
 
 import bcrypt from "bcrypt";
 
+import { INVALID_AUTH_EMAIL_MESSAGE, isValidEmailAddress } from "./auth";
 import type { IUser } from "../models/User";
 
 export type UserStoreEnv = NodeJS.ProcessEnv | undefined;
@@ -51,6 +52,22 @@ function cloneUser(user: IUser): IUser {
 
 function cloneUsers(users: IUser[]): IUser[] {
   return users.map(cloneUser);
+}
+
+function getUsernameLookupKey(username: string): string {
+  return username.trim().toLowerCase();
+}
+
+function getEmailLookupKey(email: string): string {
+  return email.trim().toLowerCase();
+}
+
+function normalizeStoredUsername(username: string): string {
+  return username.trim();
+}
+
+function normalizeStoredEmail(email: string): string {
+  return email.trim().toLowerCase();
 }
 
 export function getSeedUsers(): IUser[] {
@@ -148,7 +165,15 @@ export async function findUserByUsername(
   env: UserStoreEnv = process.env,
 ): Promise<IUser | null> {
   const store = await readUserStore(env);
-  const user = store.users.find((storedUser) => storedUser.username === username);
+  const usernameLookupKey = getUsernameLookupKey(username);
+
+  if (!usernameLookupKey) {
+    return null;
+  }
+
+  const user = store.users.find(
+    (storedUser) => getUsernameLookupKey(storedUser.username) === usernameLookupKey,
+  );
   return user ? cloneUser(user) : null;
 }
 
@@ -158,8 +183,23 @@ export async function createUser(
 ): Promise<IUser> {
   const storeFilePath = await ensureUserStore(env);
   const store = await readUserStore(env);
+  const username = normalizeStoredUsername(input.username);
+  const email = normalizeStoredEmail(input.email);
+  const usernameLookupKey = getUsernameLookupKey(username);
+  const emailLookupKey = getEmailLookupKey(email);
+
+  if (!usernameLookupKey) {
+    throw new Error("Username is required.");
+  }
+
+  if (!emailLookupKey || !isValidEmailAddress(email)) {
+    throw new Error(INVALID_AUTH_EMAIL_MESSAGE);
+  }
+
   const hasDuplicateUser = store.users.some(
-    (user) => user.username === input.username || user.email === input.email,
+    (user) =>
+      getUsernameLookupKey(user.username) === usernameLookupKey ||
+      getEmailLookupKey(user.email) === emailLookupKey,
   );
 
   if (hasDuplicateUser) {
@@ -171,8 +211,8 @@ export async function createUser(
     const passwordHash = await bcrypt.hash(input.password, 10);
     const user: IUser = {
       _id: crypto.randomUUID(),
-      username: input.username,
-      email: input.email,
+      username,
+      email,
       password: passwordHash,
       createdAt: timestamp,
       updatedAt: timestamp,

@@ -1,8 +1,10 @@
 import dbConnect from "@/lib/dbConnect";
 import {
   applyAuthCookie,
+  INVALID_AUTH_EMAIL_MESSAGE,
   getPublicAuthErrorMessage,
   INVALID_AUTH_REQUEST_MESSAGE,
+  isValidEmailAddress,
   isInvalidAuthRequestError,
   normalizeAuthField,
   readJsonBody,
@@ -22,6 +24,13 @@ export async function POST(request: Request) {
     if (!usernameTrimmed || !emailTrimmed || !passwordTrimmed) {
       return NextResponse.json(
         { message: "All fields are required." },
+        { status: 400 },
+      );
+    }
+
+    if (!isValidEmailAddress(emailTrimmed)) {
+      return NextResponse.json(
+        { message: INVALID_AUTH_EMAIL_MESSAGE },
         { status: 400 },
       );
     }
@@ -58,12 +67,17 @@ export async function POST(request: Request) {
     const message =
       getPublicAuthErrorMessage(
         error,
-        [INVALID_AUTH_REQUEST_MESSAGE, duplicateUserMessage],
+        [
+          INVALID_AUTH_EMAIL_MESSAGE,
+          INVALID_AUTH_REQUEST_MESSAGE,
+          duplicateUserMessage,
+        ],
         "Unable to sign up right now.",
       );
 
     const status =
       message === duplicateUserMessage ||
+      message === INVALID_AUTH_EMAIL_MESSAGE ||
       isInvalidAuthRequestError(error)
         ? 400
         : 500;
