@@ -1,6 +1,8 @@
 import dbConnect from "@/lib/dbConnect";
 import {
   applyAuthCookie,
+  getPublicAuthErrorMessage,
+  INVALID_AUTH_REQUEST_MESSAGE,
   isInvalidAuthRequestError,
   normalizeAuthField,
   readJsonBody,
@@ -52,18 +54,16 @@ export async function POST(request: Request) {
     return applyAuthCookie(response, token);
   } catch (error) {
     console.error("Signup error:", error);
+    const duplicateUserMessage = "Username or email already exists.";
     const message =
-      isInvalidAuthRequestError(error)
-        ? error.message
-        : error instanceof Error &&
-            error.message === "Username or email already exists."
-          ? "Username or email already exists."
-          : error instanceof Error
-            ? error.message
-            : "An error occurred during signup.";
+      getPublicAuthErrorMessage(
+        error,
+        [INVALID_AUTH_REQUEST_MESSAGE, duplicateUserMessage],
+        "Unable to sign up right now.",
+      );
 
     const status =
-      message === "Username or email already exists." ||
+      message === duplicateUserMessage ||
       isInvalidAuthRequestError(error)
         ? 400
         : 500;

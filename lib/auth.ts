@@ -99,6 +99,20 @@ export function isInvalidAuthRequestError(error: unknown): error is Error {
   );
 }
 
+export function getPublicAuthErrorMessage(
+  error: unknown,
+  allowedMessages: readonly string[],
+  fallbackMessage: string,
+): string {
+  if (!(error instanceof Error)) {
+    return fallbackMessage;
+  }
+
+  return allowedMessages.includes(error.message)
+    ? error.message
+    : fallbackMessage;
+}
+
 export function normalizeAuthField(value: unknown): string | null {
   if (typeof value !== "string") {
     return null;

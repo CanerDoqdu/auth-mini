@@ -1,6 +1,8 @@
 import dbConnect from "@/lib/dbConnect";
 import {
   applyAuthCookie,
+  getPublicAuthErrorMessage,
+  INVALID_AUTH_REQUEST_MESSAGE,
   isInvalidAuthRequestError,
   normalizeAuthField,
   readJsonBody,
@@ -39,17 +41,18 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("Login error:", error);
 
+    const invalidCredentialsMessage = "Invalid username or password";
     const status =
-      error instanceof Error && error.message === "Invalid username or password"
+      error instanceof Error && error.message === invalidCredentialsMessage
         ? 401
         : isInvalidAuthRequestError(error)
           ? 400
           : 500;
-    const message = isInvalidAuthRequestError(error)
-      ? error.message
-      : error instanceof Error
-        ? error.message
-        : "Unable to log in right now.";
+    const message = getPublicAuthErrorMessage(
+      error,
+      [INVALID_AUTH_REQUEST_MESSAGE, invalidCredentialsMessage],
+      "Unable to log in right now.",
+    );
 
     return NextResponse.json(
       { message },
