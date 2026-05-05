@@ -7,7 +7,10 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "node tests/run-tests.mjs"
+    "test": "node tests/run-tests.mjs",
+    "test:auth": "npm test -- tests/core/auth.test.ts",
+    "test:homepage": "npm test -- tests/core/homepage.test.ts",
+    "checkpoint:quality": "npm run lint && npm run build && npm test -- tests/core/auth.test.ts tests/core/homepage.test.ts"
   },
   "dependencies": {
     "bcrypt": "^6.0.0",

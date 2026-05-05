@@ -28,6 +28,8 @@ npm run dev
 npm run lint
 npm run build
 npm test -- tests/core/auth.test.ts
+npm test -- tests/core/homepage.test.ts
+npm run checkpoint:quality
 ```
 
 ## Routes
@@ -46,3 +48,5 @@ npm test -- tests/core/auth.test.ts
 - Database connection setup now reuses a cached Mongoose promise.
 - Session validation clears stale cookies when the token or user is invalid.
 - The homepage keeps the original theme while reducing unnecessary client-side rendering work.
+- `npm run checkpoint:quality` is the first-checkpoint harness: it lints, builds, reruns auth regressions, and enforces homepage build budgets after production compilation.
+- The homepage checkpoint fails if `/` stops being static, if the page becomes a client component again, or if emitted JS/CSS/server assets grow past the current budgets.
