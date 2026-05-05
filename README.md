@@ -42,6 +42,17 @@ JWT_SECRET=dev-secret-change-before-production
 - `AUTH_USER_STORE_FILE` is optional; if omitted, the app uses `data/users.json`.
 - The public demo walkthrough uses the canonical route story: `/login` -> `/signup` -> `/profile`.
 
+## Production-style rehearsal
+
+Use the same committed demo env for a handoff-safe production run:
+
+```bash
+npm run build
+npm start
+```
+
+`npm start` already loads `.env.example`, so the built demo keeps the seeded users, local JSON store default, and JWT secret from the presenter path without extra setup.
+
 ## Exact presentation walkthrough
 
 1. Start on `/` to show the seeded credentials and the JWT-in-HttpOnly-cookie story.
@@ -69,6 +80,7 @@ JWT_SECRET=dev-secret-change-before-production
 ```bash
 npm run lint
 npm run build
+npm run test:demo-handoff
 npm test -- tests/core/run_the_existing_repo_s_lint_build_and_auth_smoke_coverage_captu.test.ts
 npm test -- tests/core/demo-ui.test.ts
 npm test -- tests/core/auth.test.ts
@@ -76,6 +88,7 @@ npm test -- tests/core/homepage.test.ts
 npm test -- tests/core/turn_the_repaired_demo_into_a_safe_handoff_by_adding_route_level.test.ts
 npm test -- tests/core/lock_the_repaired_demo_with_focused_tests_and_exact_presentation.test.ts
 npm test -- tests/core/refresh_the_focused_docs_and_regression_coverage_so_the_final_se.test.ts
+npm test -- tests/core/finalize_regression_protection_and_presenter_facing_docs_so_the_.test.ts
 npm run checkpoint:quality
 ```
 
@@ -86,4 +99,5 @@ Run the built-runtime smoke command after `npm run build`; it starts the product
 - The app persists users in a local JSON store, so no MongoDB setup is required for the demo.
 - Session validation clears stale JWT cookies when the token or user is invalid.
 - The homepage remains server-rendered and build-budget checked for the presentation path.
+- `npm start` is the closest rehearsal for the live handoff path because it boots the built app with the committed demo env contract.
 - The focused test runner accepts either repo-relative or absolute test file paths, which keeps the `npm test -- tests/core/<module>.test.ts` QA commands portable on Windows shells.
