@@ -13,6 +13,7 @@ import {
   MISSING_JWT_SECRET_MESSAGE,
   isValidEmailAddress,
   normalizeAuthField,
+  normalizePasswordField,
   readJsonBody,
   signAuthToken,
   verifyAuthToken,
@@ -238,6 +239,44 @@ test("normalizeAuthField trims strings and rejects non-string values", () => {
   assert.equal(normalizeAuthField("   "), null);
   assert.equal(normalizeAuthField(123), null);
   assert.equal(normalizeAuthField({ value: "demo" }), null);
+});
+
+test("normalizePasswordField preserves exact passwords while rejecting blank values", () => {
+  assert.equal(normalizePasswordField("  secret123  "), "  secret123  ");
+  assert.equal(normalizePasswordField("   "), null);
+  assert.equal(normalizePasswordField(123), null);
+});
+
+test("User signup and login preserve passwords with surrounding spaces", async () => {
+  const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "auth-mini-spaced-password-"));
+  const env = { AUTH_USER_STORE_FILE: path.join(tempRoot, "users.json") };
+  const exactPassword = "  secret123  ";
+
+  try {
+    await dbConnect(env);
+
+    const createdUser = await User.signup(
+      "spacepass",
+      "spacepass@authmini.dev",
+      exactPassword,
+      env,
+    );
+    const loadedUser = await User.findById(createdUser._id, env);
+
+    assert.equal(loadedUser?.username, "spacepass");
+    assert.notEqual(loadedUser?.password, exactPassword);
+
+    const authenticatedUser = await User.login("spacepass", exactPassword, env);
+
+    assert.equal(authenticatedUser.username, "spacepass");
+
+    await assert.rejects(
+      () => User.login("spacepass", exactPassword.trim(), env),
+      /Invalid username or password/,
+    );
+  } finally {
+    fs.rmSync(tempRoot, { force: true, recursive: true });
+  }
 });
 
 test("isValidEmailAddress accepts normal addresses and rejects malformed input", () => {

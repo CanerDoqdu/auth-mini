@@ -5,6 +5,7 @@ import {
   INVALID_AUTH_REQUEST_MESSAGE,
   isInvalidAuthRequestError,
   normalizeAuthField,
+  normalizePasswordField,
   readJsonBody,
   signAuthToken,
 } from "@/lib/auth";
@@ -15,9 +16,9 @@ export async function POST(request: Request) {
   try {
     const body = await readJsonBody(request, "Login");
     const usernameTrimmed = normalizeAuthField(body.username);
-    const passwordTrimmed = normalizeAuthField(body.password);
+    const passwordValue = normalizePasswordField(body.password);
 
-    if (!usernameTrimmed || !passwordTrimmed) {
+    if (!usernameTrimmed || !passwordValue) {
       return NextResponse.json(
         { message: "Username and password are required." },
         { status: 400 },
@@ -26,7 +27,7 @@ export async function POST(request: Request) {
 
     await dbConnect();
 
-    const user = await User.login(usernameTrimmed, passwordTrimmed);
+    const user = await User.login(usernameTrimmed, passwordValue);
     const token = signAuthToken({
       userId: String(user._id),
       username: user.username,

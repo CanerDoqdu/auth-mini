@@ -7,6 +7,7 @@ import {
   isValidEmailAddress,
   isInvalidAuthRequestError,
   normalizeAuthField,
+  normalizePasswordField,
   readJsonBody,
   signAuthToken,
 } from "@/lib/auth";
@@ -19,9 +20,9 @@ export async function POST(request: Request) {
     const usernameTrimmed = normalizeAuthField(body.username);
     const emailValue = normalizeAuthField(body.email);
     const emailTrimmed = emailValue?.toLowerCase() ?? null;
-    const passwordTrimmed = normalizeAuthField(body.password);
+    const passwordValue = normalizePasswordField(body.password);
 
-    if (!usernameTrimmed || !emailTrimmed || !passwordTrimmed) {
+    if (!usernameTrimmed || !emailTrimmed || !passwordValue) {
       return NextResponse.json(
         { message: "All fields are required." },
         { status: 400 },
@@ -35,7 +36,7 @@ export async function POST(request: Request) {
       );
     }
 
-    if (passwordTrimmed.length < 6) {
+    if (passwordValue.length < 6) {
       return NextResponse.json(
         { message: "Password must be at least 6 characters." },
         { status: 400 },
@@ -47,7 +48,7 @@ export async function POST(request: Request) {
     const newUser = await User.signup(
       usernameTrimmed,
       emailTrimmed,
-      passwordTrimmed,
+      passwordValue,
     );
 
     const token = signAuthToken({
