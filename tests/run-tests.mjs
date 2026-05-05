@@ -20,7 +20,9 @@ if (targetArgs.length === 0) {
 }
 
 for (const targetArg of targetArgs) {
-  const targetPath = path.join(process.cwd(), targetArg);
+  const targetPath = path.isAbsolute(targetArg)
+    ? path.normalize(targetArg)
+    : path.join(process.cwd(), targetArg);
 
   if (!fs.existsSync(targetPath)) {
     console.error(`Test file not found: ${targetPath}`);
