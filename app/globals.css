@@ -248,6 +248,12 @@ input {
   max-width: 28rem;
 }
 
+.hero-support-copy {
+  color: var(--secondary-text);
+  margin-top: 1rem;
+  max-width: 42rem;
+}
+
 .hero-note-values {
   display: grid;
   gap: 0.5rem;
@@ -762,6 +768,12 @@ input {
   padding: 1rem 1.05rem;
 }
 
+.auth-route-note,
+.profile-route-context {
+  margin-bottom: 0;
+  margin-top: 1.25rem;
+}
+
 .surface-muted a {
   color: var(--accent);
 }
@@ -1005,6 +1017,10 @@ input {
   padding: 1.3rem;
 }
 
+.profile-route-context {
+  margin-top: 0;
+}
+
 .profile-side-card {
   align-self: start;
   margin-top: 0;
@@ -1101,6 +1117,12 @@ input {
     width: 100%;
   }
 
+  .auth-top-links a,
+  .auth-footer-links a,
+  .profile-link-grid a {
+    flex: 1 1 100%;
+  }
+
   .site-nav-link,
   .auth-top-links a,
   .profile-links a,
@@ -1147,6 +1169,10 @@ input {
   .profile-proof-card,
   .profile-side-card {
     padding: 1.2rem;
+  }
+
+  .hero-support-copy {
+    font-size: 0.95rem;
   }
 }
 

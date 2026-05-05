@@ -46,6 +46,8 @@ export default function SignupScreen({ variant }: SignupScreenProps) {
   const [touched, setTouched] = useState<Record<string, boolean>>({});
 
   const isRegisterRoute = variant === "register";
+  const secondaryRouteHref = isRegisterRoute ? "/signup" : "/register";
+  const secondaryRouteLabel = isRegisterRoute ? "Canonical signup" : "Register alias";
   const protectedRouteHref = isRegisterRoute ? "/dashboard" : "/profile";
   const protectedRouteLabel = isRegisterRoute ? "Protected dashboard" : "Protected route";
   const pageEyebrow = isRegisterRoute ? "Register a demo account" : "Create a demo account";
@@ -60,8 +62,8 @@ export default function SignupScreen({ variant }: SignupScreenProps) {
     ? "New users receive a JWT-backed session immediately and are redirected to /dashboard."
     : "New users receive a JWT-backed session immediately and are redirected to /profile.";
   const routeStory = isRegisterRoute
-    ? ["/register", "/dashboard"]
-    : ["/signup", "/profile"];
+    ? ["/login", "/register", "/dashboard"]
+    : ["/login", "/signup", "/profile"];
   const submitLabel = loading
     ? isRegisterRoute
       ? "Opening dashboard..."
@@ -156,7 +158,7 @@ export default function SignupScreen({ variant }: SignupScreenProps) {
           <div className="route-chip-row" aria-label="Signup route story">
             {routeStory.map((route) => (
               <span
-                className={`route-chip ${route === routeStory[0] ? "route-chip-active" : ""}`}
+                className={`route-chip ${route === routeStory[1] ? "route-chip-active" : ""}`}
                 key={route}
               >
                 {route}
@@ -186,21 +188,45 @@ export default function SignupScreen({ variant }: SignupScreenProps) {
             </div>
           )}
 
-            <div className="auth-quick-grid">
-              {signupHighlights.map((highlight) => (
-                <div className="auth-quick-card" key={highlight.title}>
-                  <span>Presentation note</span>
-                  <strong>{highlight.title}</strong>
-                  <p>{highlight.description}</p>
-                </div>
-              ))}
-            </div>
+          <div className="preview-card demo-tip-card">
+            <p className="preview-card-label">Route relationship</p>
+            <p>
+              {isRegisterRoute ? (
+                <>
+                  <strong>/register</strong> keeps the legacy entry point intact and
+                  still lands in <strong>/dashboard</strong>, while the primary demo
+                  story remains <strong>/login</strong> -&gt; <strong>/signup</strong>{" "}
+                  -&gt; <strong>/profile</strong>.
+                </>
+              ) : (
+                <>
+                  <strong>/signup</strong> is the canonical new-user flow. Keep{" "}
+                  <strong>/register</strong> and <strong>/dashboard</strong> available
+                  as compatibility aliases without changing the main demo script.
+                </>
+              )}
+            </p>
+            <Link className="inline-link" href={secondaryRouteHref}>
+              {secondaryRouteLabel}
+            </Link>
+          </div>
+
+          <div className="auth-quick-grid">
+            {signupHighlights.map((highlight) => (
+              <div className="auth-quick-card" key={highlight.title}>
+                <span>Presentation note</span>
+                <strong>{highlight.title}</strong>
+                <p>{highlight.description}</p>
+              </div>
+            ))}
+          </div>
         </section>
 
         <section className="auth-card auth-form-card">
           <div className="auth-top-links">
             <Link href="/">Home</Link>
             <Link href="/login">Login</Link>
+            <Link href={secondaryRouteHref}>{secondaryRouteLabel}</Link>
           </div>
 
           <div className="auth-header auth-header-left">
@@ -313,6 +339,7 @@ export default function SignupScreen({ variant }: SignupScreenProps) {
             </p>
             <div className="auth-footer-links">
               <Link href="/">Back to home</Link>
+              <Link href={secondaryRouteHref}>{secondaryRouteLabel}</Link>
               <Link href={protectedRouteHref}>{protectedRouteLabel}</Link>
             </div>
           </div>

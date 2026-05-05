@@ -30,6 +30,10 @@ test("demo auth surfaces expose presentation-ready copy and seeded guidance", ()
   assert.match(homepageSource, /signed token\s+stored in an HttpOnly cookie/);
   assert.match(homepageSource, /href="\/profile"/);
   assert.match(homepageSource, /Show secure signup, login, profile access, and logout/);
+  assert.match(
+    homepageSource,
+    /Compatibility\s+aliases\s+<strong>\/register<\/strong>\s+and\s+<strong>\/dashboard<\/strong>/,
+  );
   assert.match(homepageSource, /Present the canonical story as \/login -&gt; \/signup -&gt; \/profile/);
   assert.match(homepageSource, /Use seeded credentials/);
   assert.match(homepageSource, /Create a fresh user live/);
@@ -47,6 +51,8 @@ test("demo auth surfaces expose presentation-ready copy and seeded guidance", ()
   assert.match(loginSource, /Signed JWT stored in an HttpOnly cookie on success/);
   assert.match(loginSource, /opens \/profile/);
   assert.match(loginSource, /Demo-ready reminder/);
+  assert.match(loginSource, /Lead the live story with <strong>\/login<\/strong>/);
+  assert.match(loginSource, /<span className="route-chip">\/signup<\/span>/);
   assert.match(loginSource, /Fastest route/);
   assert.match(loginSource, /Fresh account option/);
   assert.match(loginSource, /shortest live walkthrough/);
@@ -56,23 +62,35 @@ test("demo auth surfaces expose presentation-ready copy and seeded guidance", ()
   assert.match(signupSource, /presentation-ready guidance/);
   assert.match(signupScreenSource, /New users receive a JWT-backed session immediately and are redirected to \/profile\./);
   assert.match(signupScreenSource, /Present the guest flow as <strong>\/login<\/strong> -&gt;/);
+  assert.match(signupScreenSource, /const secondaryRouteHref = isRegisterRoute \? "\/signup" : "\/register";/);
+  assert.match(signupScreenSource, /const secondaryRouteLabel = isRegisterRoute \? "Canonical signup" : "Register alias";/);
+  assert.match(signupScreenSource, /href=\{secondaryRouteHref\}/);
+  assert.match(signupScreenSource, /canonical new-user flow/);
   assert.match(signupScreenSource, demoPasswordPattern);
   assert.match(signupScreenSource, /What the protected landing proves/);
   assert.match(signupScreenSource, /Login-ready credentials/);
   assert.match(signupScreenSource, /Same protected payoff/);
   assert.match(signupScreenSource, /Alias-safe demo story/);
   assert.match(registerSource, /variant="register"/);
+  assert.match(registerSource, /Register \| Auth Mini Demo/);
+  assert.match(registerSource, /protected dashboard alias/);
 
   assert.match(profileSource, /variant="profile"/);
   assert.match(profileSource, /logout controls/);
   assert.match(profileScreenSource, /JWT-protected route live/);
   assert.match(profileScreenSource, /canonical protected destination for the JWT demo/);
+  assert.match(profileScreenSource, /Route context/);
+  assert.match(profileScreenSource, /dashboard alias stays available/);
+  assert.match(profileScreenSource, /Open dashboard alias/);
   assert.match(profileScreenSource, /JWT in HttpOnly cookie/);
   assert.match(profileScreenSource, /Session controls/);
-  assert.match(profileScreenSource, /Presentation path: \/login -&gt; \/signup -&gt; \/profile/);
+  assert.match(profileScreenSource, /Presentation path: \/login -> \/signup -> \/profile/);
+  assert.match(profileScreenSource, /Alias path: \/login -> \/register -> \/dashboard/);
   assert.match(profileScreenSource, /Live demo checklist/);
   assert.match(profileScreenSource, /Refresh once to prove the cookie survives beyond the initial redirect\./);
   assert.match(dashboardSource, /variant="dashboard"/);
+  assert.match(dashboardSource, /Dashboard \| Auth Mini Demo/);
+  assert.match(dashboardSource, /canonical profile flow/);
 
   assert.match(logoutSource, /Log out securely/);
   assert.match(logoutSource, /protected state is reversible/);
@@ -86,6 +104,8 @@ test("demo auth surfaces expose presentation-ready copy and seeded guidance", ()
   assert.match(globalStyles, /\.route-chip-row/);
   assert.match(globalStyles, /\.journey-grid/);
   assert.match(globalStyles, /\.surface-muted/);
+  assert.match(globalStyles, /\.hero-support-copy/);
+  assert.match(globalStyles, /\.profile-route-context/);
 });
 
 test("demo auth screens stay wired to the repaired route contract", () => {

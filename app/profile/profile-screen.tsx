@@ -121,7 +121,17 @@ export default async function ProfileScreen({ variant }: ProfileScreenProps) {
       href: guestSignupRoute,
       label: isDashboardRoute ? "Open register" : "Open signup",
     },
+    {
+      href: isDashboardRoute ? "/profile" : "/dashboard",
+      label: isDashboardRoute ? "Open canonical profile" : "Open dashboard alias",
+    },
   ];
+  const routeStory = isDashboardRoute
+    ? ["/login", "/register", "/dashboard"]
+    : ["/login", "/signup", "/profile"];
+  const routeContextCopy = isDashboardRoute
+    ? "This compatibility alias shows the same authenticated data shape after register. Guest auth still resolves to /profile as the primary protected finish."
+    : "This is the canonical protected finish. The dashboard alias stays available for older links without changing the guest auth story.";
 
   return (
     <main className="profile-page">
@@ -154,13 +164,23 @@ export default async function ProfileScreen({ variant }: ProfileScreenProps) {
         </div>
 
         <div className="route-chip-row" aria-label="Protected route story">
-          <span className="route-chip">{guestSignupRoute}</span>
-          <span className="route-chip route-chip-active">{protectedRoute}</span>
-          <span className="route-chip">/login</span>
+          {routeStory.map((route) => (
+            <span
+              className={`route-chip ${route === protectedRoute ? "route-chip-active" : ""}`}
+              key={route}
+            >
+              {route}
+            </span>
+          ))}
         </div>
 
         <div className="profile-panels">
           <div>
+            <div className="surface-muted profile-route-context">
+              <p className="preview-card-label">Route context</p>
+              <p>{routeContextCopy}</p>
+            </div>
+
             <div className="profile-details">
               {sessionDetails.map((detail) => (
                 <div className="profile-detail" key={detail.label}>
@@ -196,12 +216,11 @@ export default async function ProfileScreen({ variant }: ProfileScreenProps) {
               Head back home, revisit /login or /signup, or log out to show how
               the app returns to the guest experience.
             </p>
-            {!isDashboardRoute && (
-              <p className="profile-copy">
-                Presentation path: /login -&gt; /signup -&gt; /profile, with /register and
-                /dashboard kept as compatibility aliases.
-              </p>
-            )}
+            <p className="profile-copy">
+              {isDashboardRoute
+                ? "Alias path: /login -> /register -> /dashboard. Canonical guest path still finishes at /profile."
+                : "Presentation path: /login -> /signup -> /profile, with /register and /dashboard kept as compatibility aliases."}
+            </p>
             <div className="profile-link-grid">
               {sessionActions.map((action) => (
                 <Link href={action.href} key={action.href}>

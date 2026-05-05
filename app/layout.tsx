@@ -18,7 +18,7 @@ export const metadata: Metadata = {
     template: "%s | Auth Mini Demo",
   },
   description:
-    "A polished authentication demo with secure signup, login, logout, and a protected profile flow.",
+    "A polished authentication demo with secure signup, login, logout, a protected profile flow, and compatibility register/dashboard aliases.",
 };
 
 export const viewport: Viewport = {
