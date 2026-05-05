@@ -1,69 +1,83 @@
-"use client";
+import Link from "next/link";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import dbConnect from "@/lib/dbConnect";
+import { verifyAuthToken } from "@/lib/auth";
+import { AUTH_COOKIE_NAME } from "@/lib/authCookie";
+import User from "@/models/User";
+
+import LogoutButton from "./logout-button";
 
 type SessionUser = {
-  id: string;
   username: string;
-  email?: string;
+  email: string;
 };
 
-export default function ProfilePage() {
-  const router = useRouter();
-  const [user, setUser] = useState<SessionUser | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [logoutLoading, setLogoutLoading] = useState(false);
+async function getSessionUser(): Promise<SessionUser | null> {
+  const token = (await cookies()).get(AUTH_COOKIE_NAME)?.value;
 
-  useEffect(() => {
-    async function loadSession() {
-      try {
-        const res = await fetch("/api/session");
-        const data = await res.json();
-
-        if (res.ok && data?.authenticated && data.user) {
-          setUser(data.user);
-        } else {
-          router.push("/login");
-        }
-      } catch {
-        router.push("/login");
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    loadSession();
-  }, [router]);
-
-  async function handleLogout() {
-    setLogoutLoading(true);
-    try {
-      await fetch("/api/logout", { method: "POST" });
-      router.push("/login");
-    } finally {
-      setLogoutLoading(false);
-    }
+  if (!token) {
+    return null;
   }
 
-  if (loading) {
-    return <p style={{ margin: "2rem" }}>Loading...</p>;
+  try {
+    const { userId } = verifyAuthToken(token);
+
+    await dbConnect();
+
+    const user = await User.findById(userId)
+      .select("_id username email")
+      .lean<{ username: string; email: string } | null>();
+
+    if (!user) {
+      return null;
+    }
+
+    return {
+      username: user.username,
+      email: user.email,
+    };
+  } catch (error) {
+    console.error("Profile session error:", error);
+    return null;
+  }
+}
+
+export default async function ProfilePage() {
+  const user = await getSessionUser();
+
+  if (!user) {
+    redirect("/login");
   }
 
   return (
-    <main style={{ maxWidth: 600, margin: "2rem auto" }}>
-      <h1>Profile</h1>
+    <main className="profile-page">
+      <section className="profile-card">
+        <p className="profile-eyebrow">Authenticated session</p>
+        <h1>Welcome, {user.username}</h1>
+        <p className="profile-copy">
+          Your current session is active and protected with an HttpOnly token.
+        </p>
 
-      {user && (
-        <div>
-          <p><strong>Username:</strong> {user.username}</p>
-          {user.email && <p><strong>Email:</strong> {user.email}</p>}
+        <div className="profile-details">
+          <div className="profile-detail">
+            <span>Username</span>
+            <strong>{user.username}</strong>
+          </div>
+          <div className="profile-detail">
+            <span>Email</span>
+            <strong>{user.email}</strong>
+          </div>
         </div>
-      )}
 
-      <button onClick={handleLogout} disabled={logoutLoading}>
-        {logoutLoading ? "Logging out..." : "Logout"}
-      </button>
+        <div className="profile-links">
+          <Link href="/">Back to home</Link>
+          <Link href="/profile">Protected route</Link>
+        </div>
+
+        <LogoutButton />
+      </section>
     </main>
   );
 }
