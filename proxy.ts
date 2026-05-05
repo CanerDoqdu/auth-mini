@@ -10,13 +10,19 @@ type AuthRedirectInput = {
 export function getAuthRedirectPath({
   hasToken,
   pathname,
-}: AuthRedirectInput): "/login" | "/profile" | null {
-  if (!hasToken && pathname.startsWith("/profile")) {
+}: AuthRedirectInput): "/dashboard" | "/login" | null {
+  if (
+    !hasToken &&
+    (pathname.startsWith("/dashboard") || pathname.startsWith("/profile"))
+  ) {
     return "/login";
   }
 
-  if (hasToken && (pathname === "/login" || pathname === "/signup")) {
-    return "/profile";
+  if (
+    hasToken &&
+    (pathname === "/login" || pathname === "/register" || pathname === "/signup")
+  ) {
+    return "/dashboard";
   }
 
   return null;
@@ -36,5 +42,5 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/login", "/signup", "/profile/:path*"],
+  matcher: ["/dashboard/:path*", "/login", "/profile/:path*", "/register", "/signup"],
 };
