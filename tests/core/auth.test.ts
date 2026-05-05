@@ -145,16 +145,24 @@ test("getAuthRedirectPath sends anonymous profile requests to login", () => {
     getAuthRedirectPath({ hasToken: false, pathname: "/profile/settings" }),
     "/login",
   );
+  assert.equal(
+    getAuthRedirectPath({ hasToken: false, pathname: "/dashboard" }),
+    "/login",
+  );
 });
 
 test("getAuthRedirectPath keeps authenticated users out of guest auth pages", () => {
   assert.equal(
     getAuthRedirectPath({ hasToken: true, pathname: "/login" }),
-    "/profile",
+    "/dashboard",
   );
   assert.equal(
     getAuthRedirectPath({ hasToken: true, pathname: "/signup" }),
-    "/profile",
+    "/dashboard",
+  );
+  assert.equal(
+    getAuthRedirectPath({ hasToken: true, pathname: "/register" }),
+    "/dashboard",
   );
 });
 
@@ -165,6 +173,10 @@ test("getAuthRedirectPath allows valid route access in steady-state sessions", (
   );
   assert.equal(
     getAuthRedirectPath({ hasToken: false, pathname: "/login" }),
+    null,
+  );
+  assert.equal(
+    getAuthRedirectPath({ hasToken: true, pathname: "/dashboard" }),
     null,
   );
   assert.equal(AUTH_COOKIE_NAME, "token");

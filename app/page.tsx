@@ -4,8 +4,8 @@ const demoPassword = ["demo", "123"].join("");
 
 const stats = [
   { value: "2 seeded users", label: "Demo accounts ready" },
-  { value: "Instant redirect", label: "Login and signup result" },
-  { value: "1 protected route", label: "Profile proof point" },
+  { value: "Instant redirect", label: "Login and register result" },
+  { value: "1 protected route", label: "Dashboard proof point" },
 ];
 
 const highlights = [
@@ -17,12 +17,12 @@ const highlights = [
   {
     title: "Real demo credentials",
     description:
-      "Presenters can sign in immediately with the seeded demo account or create a fresh user without changing routes.",
+      "Presenters can sign in immediately with the seeded demo account or create a fresh user with the presentation-friendly register flow.",
   },
   {
     title: "Clear protected-state payoff",
     description:
-      "Both guest routes funnel into the same profile destination, making the successful auth state obvious on first run.",
+      "Both guest routes funnel into the same dashboard destination, making the successful auth state obvious on first run.",
   },
 ];
 
@@ -35,12 +35,12 @@ const features = [
   {
     title: "Create-and-land flow",
     description:
-      "Signup still provisions a real user and routes directly into the protected profile experience.",
+      "Register provisions a real user with the existing signup backend and routes directly into the protected dashboard experience.",
   },
   {
-    title: "Protected profile route",
+    title: "Protected dashboard route",
     description:
-      "The /profile screen stays server validated so the app still behaves like a real auth product, not a mockup.",
+      "The new /dashboard route reuses the same server-validated profile runtime so the app still behaves like a real auth product, not a mockup.",
   },
   {
     title: "Presentation-ready UI",
@@ -51,7 +51,7 @@ const features = [
 
 const demoSteps = [
   "Open login and use the seeded demo account.",
-  "Watch the app redirect into the protected profile route.",
+  "Watch the app redirect into the protected dashboard route.",
   "Log out to prove the return path back to the guest flow.",
 ];
 
@@ -74,11 +74,11 @@ export default function HomePage() {
             <Link className="site-nav-link" href="/login">
               Login
             </Link>
-            <Link className="site-nav-link" href="/profile">
-              Profile
+            <Link className="site-nav-link" href="/dashboard">
+              Dashboard
             </Link>
-            <Link className="site-nav-button" href="/signup">
-              Create account
+            <Link className="site-nav-button" href="/register">
+              Register
             </Link>
           </nav>
         </div>
@@ -88,22 +88,22 @@ export default function HomePage() {
         <div className="site-shell hero-grid">
           <div className="hero-copy">
             <p className="hero-kicker">Demo-ready authentication experience</p>
-            <h1>Show secure signup, login, profile access, and logout in one polished flow.</h1>
+            <h1>Show secure register, login, dashboard access, and logout in one polished flow.</h1>
             <p className="hero-text">
               Auth Mini is now framed as a product demo: use the seeded account,
-              create a fresh user, and land in the protected profile without
-              changing any routes or backend wiring.
+              create a fresh user, and land in the protected dashboard without
+              changing the underlying backend wiring.
             </p>
 
             <div className="hero-actions">
-              <Link className="hero-primary" href="/signup">
+              <Link className="hero-primary" href="/register">
                 Start the demo
               </Link>
               <Link className="hero-secondary" href="/login">
                 Use seeded login
               </Link>
-              <Link className="hero-secondary" href="/profile">
-                View protected profile
+              <Link className="hero-secondary" href="/dashboard">
+                View protected dashboard
               </Link>
             </div>
 
@@ -140,7 +140,7 @@ export default function HomePage() {
               <div className="preview-panel">
                 <div>
                   <p className="preview-label">Protected destination</p>
-                  <h2>Profile access unlocked</h2>
+                  <h2>Dashboard access unlocked</h2>
                 </div>
                 <span className="preview-badge">Cookie session active</span>
               </div>
@@ -200,7 +200,7 @@ export default function HomePage() {
         <div className="site-shell">
           <div className="section-heading">
             <p className="hero-kicker">Designed for the auth story</p>
-            <h2>The routes stay the same, but the experience now feels ready to show.</h2>
+            <h2>The auth runtime stays the same, but the experience now feels ready to show.</h2>
           </div>
 
           <div className="feature-grid">
@@ -218,14 +218,14 @@ export default function HomePage() {
         <div className="site-shell cta-card">
           <div>
             <p className="hero-kicker">Ready to walk it through?</p>
-            <h2>Use the seeded demo login or create a new account and land in /profile.</h2>
+            <h2>Use the seeded demo login or register a new account and land in /dashboard.</h2>
           </div>
           <div className="hero-actions">
             <Link className="hero-primary" href="/login">
               Open login
             </Link>
-            <Link className="hero-secondary" href="/signup">
-              Open signup
+            <Link className="hero-secondary" href="/register">
+              Open register
             </Link>
           </div>
         </div>
@@ -233,11 +233,11 @@ export default function HomePage() {
 
       <footer className="site-footer">
         <div className="site-shell site-footer-inner">
-          <p>Auth Mini now presents a complete demo loop from homepage to protected profile.</p>
+          <p>Auth Mini now presents a complete demo loop from homepage to the protected dashboard.</p>
           <div className="site-footer-links">
             <Link href="/login">Login</Link>
-            <Link href="/signup">Signup</Link>
-            <Link href="/profile">Profile</Link>
+            <Link href="/register">Register</Link>
+            <Link href="/dashboard">Dashboard</Link>
           </div>
         </div>
       </footer>
