@@ -5,14 +5,16 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start",
+    "start": "node --env-file=.env.example ./node_modules/next/dist/bin/next start",
     "lint": "eslint",
     "test": "node tests/run-tests.mjs",
     "test:auth": "npm test -- tests/core/auth.test.ts",
+    "test:auth-runtime-smoke": "npm test -- tests/core/run_the_existing_repo_s_lint_build_and_auth_smoke_coverage_captu.test.ts",
     "test:demo-ui": "npm test -- tests/core/demo-ui.test.ts",
     "test:homepage": "npm test -- tests/core/homepage.test.ts",
+    "test:presentation-lock": "npm test -- tests/core/lock_the_repaired_demo_with_focused_tests_and_exact_presentation.test.ts",
     "test:route-level": "npm test -- tests/core/turn_the_repaired_demo_into_a_safe_handoff_by_adding_route_level.test.ts",
-    "checkpoint:quality": "npm run lint && npm run build && npm test -- tests/core/auth.test.ts tests/core/homepage.test.ts tests/core/demo-ui.test.ts tests/core/turn_the_repaired_demo_into_a_safe_handoff_by_adding_route_level.test.ts"
+    "checkpoint:quality": "npm run lint && npm run build && npm test -- tests/core/auth.test.ts tests/core/run_the_existing_repo_s_lint_build_and_auth_smoke_coverage_captu.test.ts tests/core/homepage.test.ts tests/core/demo-ui.test.ts tests/core/turn_the_repaired_demo_into_a_safe_handoff_by_adding_route_level.test.ts tests/core/lock_the_repaired_demo_with_focused_tests_and_exact_presentation.test.ts"
   },
   "dependencies": {
     "bcrypt": "^6.0.0",
