@@ -12,6 +12,23 @@ const signupBenefits = [
   "Arrive on the same protected route the current entry point promises",
 ];
 
+const signupHighlights = [
+  {
+    title: "Login-ready credentials",
+    description: "Fresh usernames and passwords work immediately on /login.",
+  },
+  {
+    title: "Same protected payoff",
+    description:
+      "Signup lands in the same JWT-backed protected screen as the seeded path.",
+  },
+  {
+    title: "Alias-safe demo story",
+    description:
+      "Keep /register and /dashboard compatible without distracting from the canonical flow.",
+  },
+];
+
 type SignupScreenVariant = "register" | "signup";
 
 type SignupScreenProps = {
@@ -42,6 +59,9 @@ export default function SignupScreen({ variant }: SignupScreenProps) {
   const headerDescription = isRegisterRoute
     ? "New users receive a JWT-backed session immediately and are redirected to /dashboard."
     : "New users receive a JWT-backed session immediately and are redirected to /profile.";
+  const routeStory = isRegisterRoute
+    ? ["/register", "/dashboard"]
+    : ["/signup", "/profile"];
   const submitLabel = loading
     ? isRegisterRoute
       ? "Opening dashboard..."
@@ -133,6 +153,17 @@ export default function SignupScreen({ variant }: SignupScreenProps) {
             ))}
           </ul>
 
+          <div className="route-chip-row" aria-label="Signup route story">
+            {routeStory.map((route) => (
+              <span
+                className={`route-chip ${route === routeStory[0] ? "route-chip-active" : ""}`}
+                key={route}
+              >
+                {route}
+              </span>
+            ))}
+          </div>
+
           <div className="preview-card demo-tip-card">
             <p className="preview-card-label">Need the fast path instead?</p>
             <p>
@@ -154,6 +185,16 @@ export default function SignupScreen({ variant }: SignupScreenProps) {
               </p>
             </div>
           )}
+
+            <div className="auth-quick-grid">
+              {signupHighlights.map((highlight) => (
+                <div className="auth-quick-card" key={highlight.title}>
+                  <span>Presentation note</span>
+                  <strong>{highlight.title}</strong>
+                  <p>{highlight.description}</p>
+                </div>
+              ))}
+            </div>
         </section>
 
         <section className="auth-card auth-form-card">
@@ -165,6 +206,15 @@ export default function SignupScreen({ variant }: SignupScreenProps) {
           <div className="auth-header auth-header-left">
             <h1>{headerTitle}</h1>
             <p>{headerDescription}</p>
+          </div>
+
+          <div className="surface-muted">
+            <p className="preview-card-label">What the protected landing proves</p>
+            <p>
+              Successful registration signs the user in right away, then hands off
+              to <strong>{protectedRouteHref}</strong> with the same cookie-backed
+              session used everywhere else in the demo.
+            </p>
           </div>
 
           {error && (

@@ -18,6 +18,20 @@ const loginBenefits = [
   "Works with the seeded demo account or any new signup",
 ];
 
+const loginMoments = [
+  {
+    label: "Fastest route",
+    value: "/login -> /profile",
+    description: "Use the seeded demo account for the shortest live walkthrough.",
+  },
+  {
+    label: "Fresh account option",
+    value: "/signup -> /profile",
+    description:
+      "If the demo needs registration, create a user live and land in the same protected state.",
+  },
+];
+
 export default function LoginPage() {
   const router = useRouter();
 
@@ -126,6 +140,21 @@ export default function LoginPage() {
               <li key={benefit}>{benefit}</li>
             ))}
           </ul>
+
+          <div className="route-chip-row" aria-label="Login route story">
+            <span className="route-chip route-chip-active">/login</span>
+            <span className="route-chip">/profile</span>
+          </div>
+
+          <div className="auth-quick-grid">
+            {loginMoments.map((moment) => (
+              <div className="auth-quick-card" key={moment.label}>
+                <span>{moment.label}</span>
+                <strong>{moment.value}</strong>
+                <p>{moment.description}</p>
+              </div>
+            ))}
+          </div>
         </section>
 
         <section className="auth-card auth-form-card">
@@ -137,6 +166,14 @@ export default function LoginPage() {
           <div className="auth-header auth-header-left">
             <h1>Welcome back</h1>
             <p>Sign in to issue a JWT-backed session and open the protected profile demo.</p>
+          </div>
+
+          <div className="surface-muted">
+            <p className="preview-card-label">Demo-ready reminder</p>
+            <p>
+              The same repaired auth contract powers both the seeded demo login and
+              any user created on <Link href="/signup">/signup</Link>.
+            </p>
           </div>
 
           {error && (

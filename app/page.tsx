@@ -8,6 +8,27 @@ const stats = [
   { value: "1 protected route", label: "Profile proof point" },
 ];
 
+const demoPaths = [
+  {
+    route: "/login",
+    title: "Use seeded credentials",
+    description:
+      "Lead with demo / demo123 for the shortest path into the protected profile.",
+  },
+  {
+    route: "/signup",
+    title: "Create a fresh user live",
+    description:
+      "Show new-account creation without changing the JWT-backed destination.",
+  },
+  {
+    route: "/profile",
+    title: "Prove the session",
+    description:
+      "Refresh once, then log out to show the protected state is persistent and reversible.",
+  },
+];
+
 const highlights = [
   {
     title: "Fast first impression",
@@ -53,6 +74,36 @@ const demoSteps = [
   "Start on /login and use the seeded demo account for the fastest JWT happy path.",
   "Point to /signup to show that new users land in the same protected state.",
   "Finish on /profile, refresh once, and log out back to /login.",
+];
+
+const routeJourney = [
+  {
+    step: "01",
+    route: "/login",
+    title: "Open the seeded happy path",
+    description:
+      "Lead with a credible sign-in screen that exposes the demo credentials and explains the protected payoff.",
+  },
+  {
+    step: "02",
+    route: "/signup",
+    title: "Create a fresh account live",
+    description:
+      "Show that registration uses the same repaired auth contract, sets the same cookie, and lands in the same authenticated state.",
+  },
+  {
+    step: "03",
+    route: "/profile",
+    title: "Prove the protected session",
+    description:
+      "Use the server-rendered profile screen to confirm the JWT session survives refresh and exits cleanly on logout.",
+  },
+];
+
+const trustSignals = [
+  "Server-validated protected route instead of a mocked success panel",
+  "Same JWT-backed cookie contract for login, signup, and alias routes",
+  "Clear live-demo script that works on desktop, tablet, and mobile layouts",
 ];
 
 export default function HomePage() {
@@ -107,6 +158,12 @@ export default function HomePage() {
               </Link>
             </div>
 
+            <div className="route-chip-row" aria-label="Canonical auth story">
+              <span className="route-chip">/login</span>
+              <span className="route-chip">/signup</span>
+              <span className="route-chip">/profile</span>
+            </div>
+
             <div className="preview-card hero-note-card">
               <p className="preview-card-label">Demo credentials</p>
               <div className="hero-note-values">
@@ -127,6 +184,16 @@ export default function HomePage() {
                 </div>
               ))}
             </dl>
+
+            <div className="hero-path-grid">
+              {demoPaths.map((path) => (
+                <Link className="hero-path-card" href={path.route} key={path.route}>
+                  <span className="hero-path-route">{path.route}</span>
+                  <strong>{path.title}</strong>
+                  <p>{path.description}</p>
+                </Link>
+              ))}
+            </div>
           </div>
 
           <div className="hero-preview">
@@ -173,10 +240,11 @@ export default function HomePage() {
               </div>
 
               <div className="preview-card preview-card-accent">
-                <p className="preview-card-label">Why it lands</p>
+                <p className="preview-card-label">Presenter cue</p>
                 <p className="preview-quote">
-                  Smooth copy, clear actions, and a JWT-backed auth loop make the
-                  demo feel intentional from the first screen.
+                  Lead with login, mention signup as the fresh-account proof, then
+                  refresh profile once before logging out so the session story feels
+                  complete instead of staged.
                 </p>
               </div>
 
@@ -188,6 +256,28 @@ export default function HomePage() {
                 </p>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="journey-section">
+        <div className="site-shell">
+          <div className="section-heading">
+            <p className="hero-kicker">Canonical walkthrough</p>
+            <h2>The demo now reads like a real product flow instead of a set of disconnected routes.</h2>
+          </div>
+
+          <div className="journey-grid">
+            {routeJourney.map((item) => (
+              <article className="journey-card" key={item.step}>
+                <p className="journey-step">{item.step}</p>
+                <div className="route-chip-row">
+                  <span className="route-chip">{item.route}</span>
+                </div>
+                <h3>{item.title}</h3>
+                <p>{item.description}</p>
+              </article>
+            ))}
           </div>
         </div>
       </section>
@@ -220,6 +310,14 @@ export default function HomePage() {
                 <h3>{feature.title}</h3>
                 <p>{feature.description}</p>
               </article>
+            ))}
+          </div>
+
+          <div className="trust-strip">
+            {trustSignals.map((signal) => (
+              <p className="trust-pill" key={signal}>
+                {signal}
+              </p>
             ))}
           </div>
         </div>
