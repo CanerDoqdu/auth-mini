@@ -50,12 +50,28 @@ test("package scripts and README QA commands keep the docs contract test in the 
     "npm test -- tests/core/refresh_the_focused_docs_and_regression_coverage_so_the_final_se.test.ts",
   );
   assert.match(
+    packageJson.scripts["test:auth-runtime-smoke"] ?? "",
+    /tests\/core\/run_the_existing_repo_s_lint_build_and_auth_smoke_coverage_captu\.test\.ts/,
+  );
+  assert.match(
+    packageJson.scripts["checkpoint:quality"] ?? "",
+    /tests\/core\/run_the_existing_repo_s_lint_build_and_auth_smoke_coverage_captu\.test\.ts/,
+  );
+  assert.match(
     packageJson.scripts["checkpoint:quality"] ?? "",
     /tests\/core\/refresh_the_focused_docs_and_regression_coverage_so_the_final_se\.test\.ts/,
   );
   assert.match(
     readme,
+    /npm test -- tests\/core\/run_the_existing_repo_s_lint_build_and_auth_smoke_coverage_captu\.test\.ts/,
+  );
+  assert.match(
+    readme,
     /npm test -- tests\/core\/refresh_the_focused_docs_and_regression_coverage_so_the_final_se\.test\.ts/,
+  );
+  assert.match(
+    readme,
+    /Run the built-runtime smoke command after `npm run build`; it starts the production server with the committed demo env and verifies signup, login, logout, and session end-to-end\./,
   );
   assert.match(readme, /npm run checkpoint:quality/);
   assert.match(

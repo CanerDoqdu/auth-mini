@@ -69,6 +69,7 @@ JWT_SECRET=dev-secret-change-before-production
 ```bash
 npm run lint
 npm run build
+npm test -- tests/core/run_the_existing_repo_s_lint_build_and_auth_smoke_coverage_captu.test.ts
 npm test -- tests/core/demo-ui.test.ts
 npm test -- tests/core/auth.test.ts
 npm test -- tests/core/homepage.test.ts
@@ -77,6 +78,8 @@ npm test -- tests/core/lock_the_repaired_demo_with_focused_tests_and_exact_prese
 npm test -- tests/core/refresh_the_focused_docs_and_regression_coverage_so_the_final_se.test.ts
 npm run checkpoint:quality
 ```
+
+Run the built-runtime smoke command after `npm run build`; it starts the production server with the committed demo env and verifies signup, login, logout, and session end-to-end.
 
 ## Notes
 
