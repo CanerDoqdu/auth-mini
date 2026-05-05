@@ -160,6 +160,32 @@ async function withDemoEnv(
   }
 }
 
+async function withProductionJwtMisconfiguration(
+  run: () => Promise<void>,
+): Promise<void> {
+  const previousJwtSecret = process.env.JWT_SECRET;
+  const previousNodeEnv = process.env.NODE_ENV;
+
+  delete process.env.JWT_SECRET;
+  process.env.NODE_ENV = "production";
+
+  try {
+    await run();
+  } finally {
+    if (previousJwtSecret === undefined) {
+      delete process.env.JWT_SECRET;
+    } else {
+      process.env.JWT_SECRET = previousJwtSecret;
+    }
+
+    if (previousNodeEnv === undefined) {
+      delete process.env.NODE_ENV;
+    } else {
+      process.env.NODE_ENV = previousNodeEnv;
+    }
+  }
+}
+
 test("signup, session, and logout routes preserve the demo auth lifecycle", async () => {
   await withDemoEnv(async ({ userStoreFile }) => {
     const { POST: signup } = loadProjectModule<{
@@ -349,6 +375,53 @@ test("login and signup routes reject malformed request bodies", async () => {
       message: "Invalid request body.",
     });
     assert.equal(malformedSignupResponse.headers.get("set-cookie"), null);
+  });
+});
+
+test("login and signup hide production JWT misconfiguration details from clients", async () => {
+  await withDemoEnv(async () => {
+    await withProductionJwtMisconfiguration(async () => {
+      const { POST: login } = loadProjectModule<{
+        POST: (request: Request) => Promise<Response>;
+      }>(["app", "api", "login", "route.ts"]);
+      const { POST: signup } = loadProjectModule<{
+        POST: (request: Request) => Promise<Response>;
+      }>(["app", "api", "signup", "route.ts"]);
+
+      const failedLoginResponse = await login(
+        new Request("http://localhost:3000/api/login", {
+          body: JSON.stringify({
+            password: demoPassword,
+            username: demoUsername,
+          }),
+          headers: { "Content-Type": "application/json" },
+          method: "POST",
+        }),
+      );
+      const failedSignupResponse = await signup(
+        new Request("http://localhost:3000/api/signup", {
+          body: JSON.stringify({
+            email: "shielded@authmini.dev",
+            password: presenterPassword,
+            username: "shielded",
+          }),
+          headers: { "Content-Type": "application/json" },
+          method: "POST",
+        }),
+      );
+
+      assert.equal(failedLoginResponse.status, 500);
+      assert.deepEqual(await failedLoginResponse.json(), {
+        message: "Unable to log in right now.",
+      });
+      assert.equal(failedLoginResponse.headers.get("set-cookie"), null);
+
+      assert.equal(failedSignupResponse.status, 500);
+      assert.deepEqual(await failedSignupResponse.json(), {
+        message: "Unable to sign up right now.",
+      });
+      assert.equal(failedSignupResponse.headers.get("set-cookie"), null);
+    });
   });
 });
 
