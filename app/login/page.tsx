@@ -13,8 +13,8 @@ const demoAccount = {
 };
 
 const loginBenefits = [
-  "Secure cookie session created on success",
-  "Immediate redirect to the protected dashboard route",
+  "Signed JWT stored in an HttpOnly cookie on success",
+  "Immediate redirect to the protected profile route",
   "Works with the seeded demo account or any new signup",
 ];
 
@@ -74,7 +74,7 @@ export default function LoginPage() {
       if (!res.ok) {
         setError(data.message || "Login failed");
       } else {
-        router.replace("/dashboard");
+        router.replace("/profile");
         router.refresh();
       }
     } catch (error) {
@@ -90,11 +90,11 @@ export default function LoginPage() {
       <div className="auth-shell">
         <section className="auth-panel auth-showcase">
           <p className="profile-eyebrow">Secure demo login</p>
-          <h1>Walk straight into the protected dashboard experience.</h1>
+          <h1>Walk straight into the protected profile experience.</h1>
           <p className="auth-showcase-copy">
             Use the seeded credentials for the fastest happy path or sign in with
-            any account you created in register or signup. Either way, the repaired backend
-            flow sets the same auth cookie and opens /dashboard.
+            any account you created in signup. Either way, the repaired backend
+            issues the same signed JWT into an HttpOnly cookie and opens /profile.
           </p>
 
           <div className="demo-credentials-card preview-credentials">
@@ -131,12 +131,12 @@ export default function LoginPage() {
         <section className="auth-card auth-form-card">
           <div className="auth-top-links">
             <Link href="/">Home</Link>
-            <Link href="/register">Register account</Link>
+            <Link href="/signup">Create account</Link>
           </div>
 
           <div className="auth-header auth-header-left">
             <h1>Welcome back</h1>
-            <p>Sign in to open the protected dashboard demo.</p>
+            <p>Sign in to issue a JWT-backed session and open the protected profile demo.</p>
           </div>
 
           {error && (
@@ -167,7 +167,7 @@ export default function LoginPage() {
               >
                 {touched.username && errors.username
                   ? errors.username
-                  : "Try demo for the seeded account or your own registered username."}
+                  : "Try demo for the seeded account or the username you created on /signup."}
               </p>
             </div>
 
@@ -201,17 +201,17 @@ export default function LoginPage() {
               className="submit-btn"
             >
               {loading && <span className="spinner"></span>}
-              {loading ? "Opening dashboard..." : "Login"}
+              {loading ? "Opening profile..." : "Login"}
             </button>
           </form>
 
           <div className="auth-footer">
             <p>
-              Need an account instead? <Link href="/register">Register here</Link>
+              Need the new-user step? <Link href="/signup">Open /signup</Link>
             </p>
             <div className="auth-footer-links">
               <Link href="/">Back to home</Link>
-              <Link href="/dashboard">Protected dashboard</Link>
+              <Link href="/profile">Protected profile</Link>
             </div>
           </div>
         </section>

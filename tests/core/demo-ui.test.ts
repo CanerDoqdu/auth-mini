@@ -24,27 +24,37 @@ test("demo auth surfaces expose presentation-ready copy and seeded guidance", ()
   assert.match(homepageSource, /Demo-ready authentication experience/);
   assert.match(homepageSource, /<strong>Username:<\/strong> demo/);
   assert.match(homepageSource, demoPasswordPattern);
-  assert.match(homepageSource, /href="\/register"/);
-  assert.match(homepageSource, /href="\/dashboard"/);
-  assert.match(homepageSource, /Show secure register, login, dashboard access, and logout/);
+  assert.match(homepageSource, /href="\/login"/);
+  assert.match(homepageSource, /Start at \/login/);
+  assert.match(homepageSource, /JWT cookie live/);
+  assert.match(homepageSource, /signed token\s+stored in an HttpOnly cookie/);
+  assert.match(homepageSource, /href="\/profile"/);
+  assert.match(homepageSource, /Show secure signup, login, profile access, and logout/);
+  assert.match(homepageSource, /Present the canonical story as \/login -&gt; \/signup -&gt; \/profile/);
 
   assert.match(loginSource, /Use demo account/);
   assert.match(loginSource, /demo@authmini\.dev/);
-  assert.match(loginSource, /Opening dashboard\.\.\./);
+  assert.match(loginSource, /Opening profile\.\.\./);
   assert.match(loginSource, demoPasswordPattern);
-  assert.match(loginSource, /href="\/register"/);
-  assert.match(loginSource, /href="\/dashboard"/);
+  assert.match(loginSource, /href="\/signup"/);
+  assert.match(loginSource, /href="\/profile"/);
+  assert.match(loginSource, /Signed JWT stored in an HttpOnly cookie on success/);
+  assert.match(loginSource, /opens \/profile/);
 
   assert.match(signupSource, /variant="signup"/);
-  assert.match(signupScreenSource, /New users are signed in immediately and redirected to \/profile\./);
-  assert.match(signupScreenSource, /New users are signed in immediately and redirected to \/dashboard\./);
+  assert.match(signupSource, /receive a JWT-backed session/);
+  assert.match(signupScreenSource, /New users receive a JWT-backed session immediately and are redirected to \/profile\./);
+  assert.match(signupScreenSource, /Present the guest flow as <strong>\/login<\/strong> -&gt;/);
   assert.match(signupScreenSource, demoPasswordPattern);
   assert.match(registerSource, /variant="register"/);
 
   assert.match(profileSource, /variant="profile"/);
-  assert.match(profileScreenSource, /Protected route live/);
-  assert.match(profileScreenSource, /Protected dashboard live/);
+  assert.match(profileSource, /JWT in an HttpOnly cookie/);
+  assert.match(profileScreenSource, /JWT-protected route live/);
+  assert.match(profileScreenSource, /canonical protected destination for the JWT demo/);
+  assert.match(profileScreenSource, /JWT in HttpOnly cookie/);
   assert.match(profileScreenSource, /Session controls/);
+  assert.match(profileScreenSource, /Presentation path: \/login -&gt; \/signup -&gt; \/profile/);
   assert.match(dashboardSource, /variant="dashboard"/);
 
   assert.match(logoutSource, /Log out securely/);

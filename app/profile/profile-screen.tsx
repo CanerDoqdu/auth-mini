@@ -82,14 +82,14 @@ export default async function ProfileScreen({ variant }: ProfileScreenProps) {
   const protectedRoute = isDashboardRoute ? "/dashboard" : "/profile";
   const guestSignupRoute = isDashboardRoute ? "/register" : "/signup";
   const protectedRouteLabel = isDashboardRoute
-    ? "Protected dashboard live"
-    : "Protected route live";
+    ? "JWT-protected dashboard live"
+    : "JWT-protected route live";
   const destinationHeading = isDashboardRoute
     ? `${user.username}, your demo dashboard is unlocked.`
     : `${user.username}, you are inside the protected profile.`;
   const introCopy = isDashboardRoute
-    ? "This dashboard reuses the same repaired auth runtime as /profile, but presents the post-login state with the route naming the demo expects."
-    : "This is the canonical protected destination that both login and signup now build toward. The UI is tuned for demos, but the session is still backed by the same repaired auth flow.";
+    ? "This dashboard reuses the same repaired auth runtime as /profile, but presents the post-login state with the route naming the demo expects and a JWT-backed session behind it."
+    : "This is the canonical protected destination for the JWT demo. Login and signup both issue the same signed token into an HttpOnly cookie, so the authenticated state is easy to prove live.";
   const accountType =
     user.username === "demo" || user.username === "guest"
       ? "Seeded demo account"
@@ -100,14 +100,14 @@ export default async function ProfileScreen({ variant }: ProfileScreenProps) {
   const sessionDetails = [
     { label: "Signed in as", value: user.username },
     { label: "Email", value: user.email },
-    { label: "Session mode", value: "HttpOnly auth cookie" },
+    { label: "Session mode", value: "JWT in HttpOnly cookie" },
     { label: "Protected route", value: protectedRoute },
   ];
 
   const proofPoints = [
-    "The page is server rendered and only resolves with a valid auth token.",
-    "Refreshing keeps the authenticated state instead of dropping back to guest screens.",
-    "Logout clears the cookie and returns the app to the login route.",
+    "The page is server rendered and only resolves with a valid JWT-backed auth token.",
+    "Refreshing keeps the authenticated state by reusing the HttpOnly cookie instead of dropping back to guest screens.",
+    "Logout clears the JWT cookie and returns the app to the login route.",
   ];
 
   return (
@@ -163,14 +163,14 @@ export default async function ProfileScreen({ variant }: ProfileScreenProps) {
 
           <aside className="profile-side-card">
             <p className="preview-card-label">Session controls</p>
-            <h2>Complete the demo loop.</h2>
+            <h2>Complete the JWT demo loop.</h2>
             <p className="profile-copy">
-              Head back home, try another account flow, or log out to show how
+              Head back home, revisit /login or /signup, or log out to show how
               the app returns to the guest experience.
             </p>
             {!isDashboardRoute && (
               <p className="profile-copy">
-                Presentation path: /login to /signup to /profile, with /register and
+                Presentation path: /login -&gt; /signup -&gt; /profile, with /register and
                 /dashboard kept as compatibility aliases.
               </p>
             )}

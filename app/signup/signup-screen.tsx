@@ -8,7 +8,7 @@ const demoPassword = ["demo", "123"].join("");
 
 const signupBenefits = [
   "Create a fresh account in the local demo store",
-  "Get signed in immediately after registration",
+  "Get a signed JWT in an HttpOnly cookie immediately after registration",
   "Arrive on the same protected route the current entry point promises",
 ];
 
@@ -34,14 +34,14 @@ export default function SignupScreen({ variant }: SignupScreenProps) {
   const pageEyebrow = isRegisterRoute ? "Register a demo account" : "Create a demo account";
   const pageHeading = isRegisterRoute
     ? "Register a brand-new user and land in the protected dashboard immediately."
-    : "Launch a brand-new user and land in the protected route immediately.";
+    : "Create a brand-new user and land in the protected profile immediately.";
   const pageDescription = isRegisterRoute
-    ? "Register keeps the same backend flow but now explains the payoff: successful registration signs you in, drops you into /dashboard, and gives you a presentation-ready authenticated state to show."
-    : "Signup keeps the same backend flow but now explains the payoff: successful registration signs you in, drops you into /profile, and gives you a presentation-ready account state to show.";
+    ? "Register keeps the same backend flow but now explains the payoff: successful registration signs you in, issues a JWT-backed session, drops you into /dashboard, and gives you a presentation-ready authenticated state to show."
+    : "Signup keeps the same backend flow but now explains the payoff: successful registration signs you in, issues a JWT-backed session, drops you into /profile, and gives you a presentation-ready account state to show.";
   const headerTitle = isRegisterRoute ? "Register account" : "Create account";
   const headerDescription = isRegisterRoute
-    ? "New users are signed in immediately and redirected to /dashboard."
-    : "New users are signed in immediately and redirected to /profile.";
+    ? "New users receive a JWT-backed session immediately and are redirected to /dashboard."
+    : "New users receive a JWT-backed session immediately and are redirected to /profile.";
   const submitLabel = loading
     ? isRegisterRoute
       ? "Opening dashboard..."
@@ -143,6 +143,17 @@ export default function SignupScreen({ variant }: SignupScreenProps) {
               Switch to login
             </Link>
           </div>
+
+          {!isRegisterRoute && (
+            <div className="preview-card demo-tip-card">
+              <p className="preview-card-label">Canonical JWT demo path</p>
+              <p>
+                Present the guest flow as <strong>/login</strong> -&gt;{" "}
+                <strong>/signup</strong> -&gt; <strong>/profile</strong>. The older
+                alias routes stay available for compatibility.
+              </p>
+            </div>
+          )}
         </section>
 
         <section className="auth-card auth-form-card">

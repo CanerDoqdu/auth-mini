@@ -4,8 +4,8 @@ const demoPassword = ["demo", "123"].join("");
 
 const stats = [
   { value: "2 seeded users", label: "Demo accounts ready" },
-  { value: "Instant redirect", label: "Login and register result" },
-  { value: "1 protected route", label: "Dashboard proof point" },
+  { value: "JWT in cookie", label: "Shared auth contract" },
+  { value: "1 protected route", label: "Profile proof point" },
 ];
 
 const highlights = [
@@ -17,12 +17,12 @@ const highlights = [
   {
     title: "Real demo credentials",
     description:
-      "Presenters can sign in immediately with the seeded demo account or create a fresh user with the presentation-friendly register flow.",
+      "Presenters can sign in immediately with the seeded demo account or create a fresh user with the presentation-friendly signup flow.",
   },
   {
     title: "Clear protected-state payoff",
     description:
-      "Both guest routes funnel into the same dashboard destination, making the successful auth state obvious on first run.",
+      "Both guest routes issue the same JWT-backed session and funnel into the protected profile destination, making the successful auth state obvious on first run.",
   },
 ];
 
@@ -30,17 +30,17 @@ const features = [
   {
     title: "Seeded login path",
     description:
-      "Use demo / demo123 to show the happy path immediately, with the same cookie-backed session as any new signup.",
+      "Use demo / demo123 to show the happy path immediately, with the same signed JWT in an HttpOnly cookie as any new signup.",
   },
   {
-    title: "Create-and-land flow",
+    title: "Signup-and-land flow",
     description:
-      "Register provisions a real user with the existing signup backend and routes directly into the protected dashboard experience.",
+      "Signup provisions a real user with the existing auth backend, issues the same JWT session, and routes directly into the protected profile experience.",
   },
   {
-    title: "Protected dashboard route",
+    title: "Protected profile route",
     description:
-      "The new /dashboard route reuses the same server-validated profile runtime so the app still behaves like a real auth product, not a mockup.",
+      "The primary /profile route stays server-validated against the JWT payload so the app still behaves like a real auth product, not a mockup.",
   },
   {
     title: "Presentation-ready UI",
@@ -50,9 +50,9 @@ const features = [
 ];
 
 const demoSteps = [
-  "Open login and use the seeded demo account.",
-  "Watch the app redirect into the protected dashboard route.",
-  "Log out to prove the return path back to the guest flow.",
+  "Start on /login and use the seeded demo account for the fastest JWT happy path.",
+  "Point to /signup to show that new users land in the same protected state.",
+  "Finish on /profile, refresh once, and log out back to /login.",
 ];
 
 export default function HomePage() {
@@ -74,11 +74,11 @@ export default function HomePage() {
             <Link className="site-nav-link" href="/login">
               Login
             </Link>
-            <Link className="site-nav-link" href="/dashboard">
-              Dashboard
+            <Link className="site-nav-link" href="/profile">
+              Profile
             </Link>
-            <Link className="site-nav-button" href="/register">
-              Register
+            <Link className="site-nav-button" href="/signup">
+              Sign up
             </Link>
           </nav>
         </div>
@@ -88,22 +88,22 @@ export default function HomePage() {
         <div className="site-shell hero-grid">
           <div className="hero-copy">
             <p className="hero-kicker">Demo-ready authentication experience</p>
-            <h1>Show secure register, login, dashboard access, and logout in one polished flow.</h1>
+            <h1>Show secure signup, login, profile access, and logout in one polished flow.</h1>
             <p className="hero-text">
-              Auth Mini is now framed as a product demo: use the seeded account,
-              create a fresh user, and land in the protected dashboard without
-              changing the underlying backend wiring.
+              Auth Mini now tells a clear JWT auth story: start at /login, point
+              to /signup for new users, and land in /profile with a signed token
+              stored in an HttpOnly cookie.
             </p>
 
             <div className="hero-actions">
-              <Link className="hero-primary" href="/register">
-                Start the demo
+              <Link className="hero-primary" href="/login">
+                Start at /login
               </Link>
-              <Link className="hero-secondary" href="/login">
-                Use seeded login
+              <Link className="hero-secondary" href="/signup">
+                Show /signup
               </Link>
-              <Link className="hero-secondary" href="/dashboard">
-                View protected dashboard
+              <Link className="hero-secondary" href="/profile">
+                Preview /profile
               </Link>
             </div>
 
@@ -140,9 +140,9 @@ export default function HomePage() {
               <div className="preview-panel">
                 <div>
                   <p className="preview-label">Protected destination</p>
-                  <h2>Dashboard access unlocked</h2>
+                  <h2>Profile access unlocked</h2>
                 </div>
-                <span className="preview-badge">Cookie session active</span>
+                <span className="preview-badge">JWT cookie live</span>
               </div>
 
               <div className="preview-card">
@@ -175,8 +175,16 @@ export default function HomePage() {
               <div className="preview-card preview-card-accent">
                 <p className="preview-card-label">Why it lands</p>
                 <p className="preview-quote">
-                  Smooth copy, clear actions, and the same repaired backend flow
-                  make the auth demo feel intentional from the first screen.
+                  Smooth copy, clear actions, and a JWT-backed auth loop make the
+                  demo feel intentional from the first screen.
+                </p>
+              </div>
+
+              <div className="preview-card">
+                <p className="preview-card-label">Route vocabulary</p>
+                <p className="preview-quote">
+                  Present the canonical story as /login -&gt; /signup -&gt; /profile.
+                  The /register and /dashboard aliases still work in the background.
                 </p>
               </div>
             </div>
@@ -200,7 +208,10 @@ export default function HomePage() {
         <div className="site-shell">
           <div className="section-heading">
             <p className="hero-kicker">Designed for the auth story</p>
-            <h2>The auth runtime stays the same, but the experience now feels ready to show.</h2>
+            <h2>
+              The auth runtime stays the same, but the /login -&gt; /signup -&gt; /profile
+              story now feels ready to show.
+            </h2>
           </div>
 
           <div className="feature-grid">
@@ -218,14 +229,14 @@ export default function HomePage() {
         <div className="site-shell cta-card">
           <div>
             <p className="hero-kicker">Ready to walk it through?</p>
-            <h2>Use the seeded demo login or register a new account and land in /dashboard.</h2>
+            <h2>Open /login, show /signup, and finish in /profile with the same JWT session.</h2>
           </div>
           <div className="hero-actions">
             <Link className="hero-primary" href="/login">
-              Open login
+              Open /login
             </Link>
-            <Link className="hero-secondary" href="/register">
-              Open register
+            <Link className="hero-secondary" href="/signup">
+              Open /signup
             </Link>
           </div>
         </div>
@@ -233,11 +244,11 @@ export default function HomePage() {
 
       <footer className="site-footer">
         <div className="site-shell site-footer-inner">
-          <p>Auth Mini now presents a complete demo loop from homepage to the protected dashboard.</p>
+          <p>Auth Mini now presents a complete JWT auth loop from homepage to the protected profile.</p>
           <div className="site-footer-links">
             <Link href="/login">Login</Link>
-            <Link href="/register">Register</Link>
-            <Link href="/dashboard">Dashboard</Link>
+            <Link href="/signup">Signup</Link>
+            <Link href="/profile">Profile</Link>
           </div>
         </div>
       </footer>
