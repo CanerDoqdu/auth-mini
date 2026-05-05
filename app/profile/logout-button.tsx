@@ -42,6 +42,10 @@ export default function LogoutButton() {
       >
         {logoutLoading ? "Clearing session..." : "Log out securely"}
       </button>
+      <p className="logout-support-copy">
+        This keeps the demo honest by showing that the protected state is reversible,
+        not a one-way mock success screen.
+      </p>
     </div>
   );
 }

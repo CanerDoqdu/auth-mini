@@ -25,7 +25,9 @@ html {
 }
 
 body {
-  background: var(--background);
+  background:
+    radial-gradient(circle at top, rgba(212, 175, 55, 0.08), transparent 28%),
+    var(--background);
   color: var(--foreground);
   font-family: var(--font-geist-sans), "Segoe UI", sans-serif;
   line-height: 1.6;
@@ -136,7 +138,9 @@ input {
 .site-nav {
   align-items: center;
   display: flex;
+  flex-wrap: wrap;
   gap: 1rem;
+  justify-content: flex-end;
 }
 
 .site-nav-link,
@@ -249,6 +253,29 @@ input {
   gap: 0.5rem;
 }
 
+.route-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  margin-top: 1.25rem;
+}
+
+.route-chip {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  color: var(--secondary-text);
+  font-size: 0.85rem;
+  font-weight: 700;
+  padding: 0.5rem 0.8rem;
+}
+
+.route-chip-active {
+  background: rgba(212, 175, 55, 0.12);
+  border-color: rgba(212, 175, 55, 0.28);
+  color: var(--accent);
+}
+
 .hero-primary,
 .hero-secondary {
   align-items: center;
@@ -294,6 +321,44 @@ input {
 .hero-stat dd {
   font-size: 1.3rem;
   font-weight: 700;
+}
+
+.hero-path-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-top: 1.5rem;
+}
+
+.hero-path-card {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 1.25rem;
+  color: inherit;
+  display: grid;
+  gap: 0.45rem;
+  padding: 1rem 1.05rem;
+}
+
+.hero-path-card:hover {
+  border-color: rgba(212, 175, 55, 0.28);
+  transform: translateY(-1px);
+}
+
+.hero-path-route {
+  color: var(--accent);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.hero-path-card strong {
+  font-size: 1.05rem;
+}
+
+.hero-path-card p {
+  color: var(--secondary-text);
 }
 
 .hero-preview {
@@ -419,12 +484,14 @@ input {
 }
 
 .proof-section,
-.feature-section {
+.feature-section,
+.journey-section {
   padding: 0 0 4rem;
 }
 
 .proof-grid,
-.feature-grid {
+.feature-grid,
+.journey-grid {
   display: grid;
   gap: 1.25rem;
 }
@@ -433,8 +500,13 @@ input {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
+.journey-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
 .proof-card,
 .feature-card,
+.journey-card,
 .cta-card,
 .auth-card,
 .profile-card {
@@ -442,9 +514,28 @@ input {
 }
 
 .proof-card h2,
-.feature-card h3 {
+.feature-card h3,
+.journey-card h3 {
   font-size: 1.35rem;
   margin-bottom: 0.75rem;
+}
+
+.journey-card {
+  background: rgba(24, 24, 24, 0.66);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 1.5rem;
+}
+
+.journey-step {
+  color: var(--accent);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  margin-bottom: 0.75rem;
+}
+
+.journey-card p:last-child {
+  color: var(--secondary-text);
 }
 
 .section-heading {
@@ -466,6 +557,21 @@ input {
 
 .feature-card h3 {
   color: var(--foreground);
+}
+
+.trust-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.9rem;
+  margin-top: 1.5rem;
+}
+
+.trust-pill {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  color: var(--secondary-text);
+  padding: 0.8rem 1rem;
 }
 
 .cta-section {
@@ -502,11 +608,11 @@ input {
 
 .auth-container,
 .profile-page {
-  align-items: center;
+  align-items: flex-start;
   display: flex;
   justify-content: center;
   min-height: 100vh;
-  padding: 2rem 1.5rem;
+  padding: 4.5rem 1.5rem 3rem;
   position: relative;
 }
 
@@ -520,6 +626,7 @@ input {
 }
 
 .auth-shell {
+  align-items: start;
   display: grid;
   gap: 1.5rem;
   grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
@@ -548,7 +655,7 @@ input {
 
 .auth-showcase h1,
 .profile-side-card h2 {
-  font-size: clamp(2.1rem, 4vw, 3.25rem);
+  font-size: clamp(2rem, 3.3vw, 2.85rem);
   letter-spacing: -0.04em;
   line-height: 1.05;
 }
@@ -611,6 +718,54 @@ input {
   color: var(--secondary-text);
 }
 
+.auth-quick-grid {
+  display: grid;
+  gap: 0.9rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.auth-quick-card,
+.surface-muted {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 1.1rem;
+}
+
+.auth-quick-card {
+  display: grid;
+  gap: 0.45rem;
+  min-height: 100%;
+  padding: 0.95rem 1rem;
+}
+
+.auth-quick-card span {
+  color: var(--secondary-text);
+  display: block;
+  font-size: 0.78rem;
+  margin-bottom: 0.35rem;
+  text-transform: uppercase;
+}
+
+.auth-quick-card strong {
+  font-size: 1rem;
+  line-height: 1.35;
+}
+
+.auth-quick-card p {
+  color: var(--secondary-text);
+  font-size: 0.92rem;
+}
+
+.surface-muted {
+  color: var(--secondary-text);
+  margin-bottom: 1.25rem;
+  padding: 1rem 1.05rem;
+}
+
+.surface-muted a {
+  color: var(--accent);
+}
+
 .auth-form-card {
   padding-top: 1.3rem;
 }
@@ -650,6 +805,18 @@ input {
 .auth-footer-links a {
   color: var(--secondary-text);
   text-decoration: none;
+}
+
+.auth-top-links a,
+.profile-links a,
+.profile-link-grid a {
+  align-items: center;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  display: inline-flex;
+  min-height: 2.6rem;
+  padding: 0 0.9rem;
 }
 
 .auth-top-links a:hover,
@@ -770,6 +937,10 @@ input {
   z-index: 1;
 }
 
+.profile-card h1 {
+  font-size: clamp(2.8rem, 4.8vw, 4.3rem);
+}
+
 .profile-topbar {
   align-items: flex-start;
   display: flex;
@@ -839,6 +1010,21 @@ input {
   margin-top: 0;
 }
 
+.profile-link-grid {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+}
+
+.profile-link-grid a {
+  color: var(--secondary-text);
+  text-decoration: none;
+}
+
+.profile-link-grid a:hover {
+  color: var(--accent);
+}
+
 .profile-actions {
   margin-top: 1.5rem;
 }
@@ -854,14 +1040,22 @@ input {
 }
 
 .profile-logout-button {
-  max-width: 16rem;
+  max-width: none;
+}
+
+.logout-support-copy {
+  color: var(--secondary-text);
+  margin-top: 0.85rem;
+  max-width: none;
 }
 
 @media (max-width: 1024px) {
   .hero-grid,
   .proof-grid,
   .feature-grid,
+  .journey-grid,
   .profile-details,
+  .hero-path-grid,
   .auth-shell,
   .profile-panels {
     grid-template-columns: 1fr;
@@ -886,6 +1080,11 @@ input {
     padding-top: 4rem;
   }
 
+  .auth-container,
+  .profile-page {
+    padding-top: 2rem;
+  }
+
   .hero-actions,
   .site-nav,
   .site-footer-links,
@@ -902,10 +1101,18 @@ input {
     width: 100%;
   }
 
+  .site-nav-link,
+  .auth-top-links a,
+  .profile-links a,
+  .profile-link-grid a {
+    justify-content: center;
+  }
+
   .hero-stats {
     grid-template-columns: 1fr;
   }
 
+  .auth-quick-grid,
   .preview-credentials,
   .demo-credentials-card,
   .profile-status-banner {
@@ -916,6 +1123,10 @@ input {
 @media (max-width: 640px) {
   .site-shell {
     padding: 0 1rem;
+  }
+
+  .site-header-inner {
+    align-items: stretch;
   }
 
   .preview-panel {

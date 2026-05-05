@@ -109,6 +109,19 @@ export default async function ProfileScreen({ variant }: ProfileScreenProps) {
     "Refreshing keeps the authenticated state by reusing the HttpOnly cookie instead of dropping back to guest screens.",
     "Logout clears the JWT cookie and returns the app to the login route.",
   ];
+  const sessionChecklist = [
+    `Show the authenticated destination as ${protectedRoute}.`,
+    "Refresh once to prove the cookie survives beyond the initial redirect.",
+    "Use logout to return cleanly to the guest flow.",
+  ];
+  const sessionActions = [
+    { href: "/", label: "Back to home" },
+    { href: "/login", label: "Replay login" },
+    {
+      href: guestSignupRoute,
+      label: isDashboardRoute ? "Open register" : "Open signup",
+    },
+  ];
 
   return (
     <main className="profile-page">
@@ -140,6 +153,12 @@ export default async function ProfileScreen({ variant }: ProfileScreenProps) {
           </div>
         </div>
 
+        <div className="route-chip-row" aria-label="Protected route story">
+          <span className="route-chip">{guestSignupRoute}</span>
+          <span className="route-chip route-chip-active">{protectedRoute}</span>
+          <span className="route-chip">/login</span>
+        </div>
+
         <div className="profile-panels">
           <div>
             <div className="profile-details">
@@ -159,6 +178,15 @@ export default async function ProfileScreen({ variant }: ProfileScreenProps) {
                 ))}
               </ul>
             </div>
+
+            <div className="profile-proof-card">
+              <p className="preview-card-label">Live demo checklist</p>
+              <ul className="profile-proof-list">
+                {sessionChecklist.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            </div>
           </div>
 
           <aside className="profile-side-card">
@@ -174,6 +202,13 @@ export default async function ProfileScreen({ variant }: ProfileScreenProps) {
                 /dashboard kept as compatibility aliases.
               </p>
             )}
+            <div className="profile-link-grid">
+              {sessionActions.map((action) => (
+                <Link href={action.href} key={action.href}>
+                  {action.label}
+                </Link>
+              ))}
+            </div>
             <LogoutButton />
           </aside>
         </div>
