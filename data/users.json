@@ -1,0 +1,20 @@
+{
+  "users": [
+    {
+      "_id": "demo-user-1",
+      "username": "demo",
+      "email": "demo@authmini.dev",
+      "password": "$2b$10$TIcjgaNprPWaIIZS7apk0eYVB26H8Zw0dn67vSDRaXBXbqLpiRx26",
+      "createdAt": "2026-01-01T00:00:00.000Z",
+      "updatedAt": "2026-01-01T00:00:00.000Z"
+    },
+    {
+      "_id": "demo-user-2",
+      "username": "guest",
+      "email": "guest@authmini.dev",
+      "password": "$2b$10$QygEsi31C9SLAmB80/HehuIz3x0NIRvBGo1iuZ1DI22ibohBrcifS",
+      "createdAt": "2026-01-02T00:00:00.000Z",
+      "updatedAt": "2026-01-02T00:00:00.000Z"
+    }
+  ]
+}

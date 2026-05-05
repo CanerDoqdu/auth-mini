@@ -42,7 +42,7 @@ export async function POST(request: Request) {
   } catch (error) {
     const err = error as Error;
     console.error("Signup error:", error);
-    const message = err.message?.includes("duplicate key")
+    const message = err.message === "Username or email already exists."
       ? "Username or email already exists."
       : err.message || "An error occurred during signup.";
 
