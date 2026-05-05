@@ -1,52 +1,70 @@
 # auth-mini
 
-Auth Mini is a focused Next.js authentication starter with JWT cookies, MongoDB persistence, a protected profile flow, and a responsive dark-and-gold landing page.
+Auth Mini is a demo-ready Next.js authentication app with signup, login, logout, a protected `/profile` route, JWT cookies, and local JSON persistence that runs without any external services.
 
-## What ships today
+## Demo quick start
 
-- Signup, login, logout, and session-check API routes
-- Cookie-backed JWT auth with shared signing and verification helpers
-- Middleware protection for `/profile`
-- Server-rendered profile loading for a smoother post-auth transition
-- Responsive home hero and proof sections without pointer-tracking rerenders
-
-## Environment
-
-Create `.env.local` with:
-
-```bash
-MONGO_URI=your_mongodb_connection_string
-# or MONGODB_URI=your_mongodb_connection_string
-JWT_SECRET=your_secret_key
-```
-
-## Scripts
+1. Install dependencies.
+2. Copy the demo environment file.
+3. Start the app.
 
 ```bash
 npm install
+cp .env.example .env.local
 npm run dev
-npm run lint
-npm run build
-npm test -- tests/core/auth.test.ts
-npm test -- tests/core/homepage.test.ts
-npm run checkpoint:quality
 ```
+
+Open `http://localhost:3000` and use one of the seeded accounts:
+
+| Username | Password | Email |
+| --- | --- | --- |
+| `demo` | `demo123` | `demo@authmini.dev` |
+| `guest` | `guest123` | `guest@authmini.dev` |
+
+### What `.env.local` does
+
+`.env.example` is already configured for the self-contained demo path:
+
+```bash
+JWT_SECRET=dev-secret-change-before-production
+# AUTH_USER_STORE_FILE=./data/users.json
+```
+
+- `JWT_SECRET` gives the local demo a safe non-production default; replace it for any shared or deployed environment.
+- `AUTH_USER_STORE_FILE` is optional; if omitted, the app uses `data/users.json`.
+
+## Exact presentation walkthrough
+
+1. Start on `/` to show the seeded credentials and auth story.
+2. Open `/login`, click **Use demo account**, and sign in as `demo / demo123`.
+3. Land on `/profile` to show the protected route, seeded account details, and session copy.
+4. Click **Log out securely** to clear the cookie and return to `/login`.
+5. Open `/signup`, create a fresh account, and show that the app signs the user in immediately.
+6. Refresh `/profile` to prove the cookie-backed session survives navigation.
 
 ## Routes
 
-- `/` - Landing page with hero, proof cards, feature grid, and CTA
-- `/signup` - Registration form that creates a session and routes to `/profile`
-- `/login` - Login form that restores a session and routes to `/profile`
-- `/profile` - Protected route rendered from the current session cookie
+- `/` - Landing page with demo credentials and the auth walkthrough
+- `/signup` - Registration form that creates a user, signs in immediately, and routes to `/profile`
+- `/login` - Login form for seeded or newly created users
+- `/profile` - Protected route rendered from the current auth cookie
 - `/api/signup` - Create a user and set the auth cookie
 - `/api/login` - Authenticate and set the auth cookie
 - `/api/logout` - Clear the auth cookie
 - `/api/session` - Validate the auth cookie and return the current user
 
+## Quality commands
+
+```bash
+npm run lint
+npm run build
+npm test -- tests/core/auth.test.ts
+npm test -- tests/core/homepage.test.ts
+npm test -- tests/core/turn_the_repaired_demo_into_a_safe_handoff_by_adding_route_level.test.ts
+```
+
 ## Notes
 
-- Database connection setup now reuses a cached Mongoose promise.
+- The app persists users in a local JSON store, so no MongoDB setup is required for the demo.
 - Session validation clears stale cookies when the token or user is invalid.
-- The homepage keeps the original theme while reducing unnecessary client-side rendering work.
-- `npm run checkpoint:quality` is the first-checkpoint harness: it lints, builds, reruns auth regressions, and enforces homepage build budgets after production compilation.
-- The homepage checkpoint fails if `/` stops being static, if the page becomes a client component again, or if emitted JS/CSS/server assets grow past the current budgets.
+- The homepage remains server-rendered and build-budget checked for the presentation path.
