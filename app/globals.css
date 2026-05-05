@@ -239,6 +239,16 @@ input {
   margin-top: 2rem;
 }
 
+.hero-note-card {
+  margin-top: 2rem;
+  max-width: 28rem;
+}
+
+.hero-note-values {
+  display: grid;
+  gap: 0.5rem;
+}
+
 .hero-primary,
 .hero-secondary {
   align-items: center;
@@ -361,6 +371,21 @@ input {
 .preview-card {
   margin-top: 1rem;
   padding: 1.1rem 1.15rem;
+}
+
+.preview-credentials {
+  display: grid;
+  gap: 0.85rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.preview-credentials span,
+.profile-status-label {
+  color: var(--secondary-text);
+  display: block;
+  font-size: 0.78rem;
+  margin-bottom: 0.3rem;
+  text-transform: uppercase;
 }
 
 .preview-list {
@@ -494,14 +519,109 @@ input {
   width: 30rem;
 }
 
-.auth-card {
-  max-width: 32rem;
+.auth-shell {
+  display: grid;
+  gap: 1.5rem;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+  max-width: 73rem;
+  position: relative;
   width: 100%;
+  z-index: 1;
+}
+
+.auth-panel,
+.auth-form-card,
+.profile-proof-card,
+.profile-side-card,
+.demo-credentials-card {
+  background: rgba(24, 24, 24, 0.82);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 1.5rem;
+}
+
+.auth-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 1.6rem;
+}
+
+.auth-showcase h1,
+.profile-side-card h2 {
+  font-size: clamp(2.1rem, 4vw, 3.25rem);
+  letter-spacing: -0.04em;
+  line-height: 1.05;
+}
+
+.auth-showcase-copy {
+  color: var(--secondary-text);
+}
+
+.demo-credentials-card {
+  padding: 1rem 1.1rem;
+}
+
+.demo-fill-button,
+.inline-link {
+  align-items: center;
+  color: var(--accent);
+  display: inline-flex;
+  font-weight: 700;
+  gap: 0.4rem;
+  text-decoration: none;
+}
+
+.demo-fill-button {
+  background: transparent;
+  border: 1px solid rgba(212, 175, 55, 0.26);
+  border-radius: 999px;
+  cursor: pointer;
+  justify-content: center;
+  min-height: 3rem;
+  padding: 0 1.1rem;
+  width: fit-content;
+}
+
+.demo-fill-button:hover:not(:disabled),
+.inline-link:hover {
+  color: var(--accent-light);
+}
+
+.auth-feature-list,
+.profile-proof-list {
+  color: var(--foreground);
+  display: grid;
+  gap: 0.75rem;
+  list-style: none;
+}
+
+.auth-feature-list li,
+.profile-proof-list li {
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  padding-top: 0.75rem;
+}
+
+.auth-feature-list li:first-child,
+.profile-proof-list li:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.demo-tip-card {
+  color: var(--secondary-text);
+}
+
+.auth-form-card {
+  padding-top: 1.3rem;
 }
 
 .auth-header {
   margin-bottom: 2rem;
   text-align: center;
+}
+
+.auth-header-left {
+  text-align: left;
 }
 
 .auth-header h1 {
@@ -513,6 +633,28 @@ input {
 .auth-header p {
   color: var(--secondary-text);
   margin-top: 1rem;
+}
+
+.auth-top-links,
+.auth-footer-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.auth-top-links {
+  margin-bottom: 1.4rem;
+}
+
+.auth-top-links a,
+.auth-footer-links a {
+  color: var(--secondary-text);
+  text-decoration: none;
+}
+
+.auth-top-links a:hover,
+.auth-footer-links a:hover {
+  color: var(--accent);
 }
 
 .form-group {
@@ -544,6 +686,16 @@ input {
 
 .form-group input:focus {
   border-bottom-color: var(--accent);
+}
+
+.field-message {
+  color: var(--secondary-text);
+  font-size: 0.85rem;
+  margin-top: 0.15rem;
+}
+
+.field-message-error {
+  color: var(--error);
 }
 
 .form-group input:disabled,
@@ -612,21 +764,49 @@ input {
 }
 
 .profile-card {
-  max-width: 42rem;
+  max-width: 72rem;
   position: relative;
   width: 100%;
   z-index: 1;
+}
+
+.profile-topbar {
+  align-items: flex-start;
+  display: flex;
+  gap: 1.5rem;
+  justify-content: space-between;
 }
 
 .profile-copy {
   margin-top: 1rem;
 }
 
-.profile-details {
+.profile-status-banner {
+  background: linear-gradient(
+    135deg,
+    rgba(212, 175, 55, 0.14),
+    rgba(255, 255, 255, 0.03)
+  );
+  border: 1px solid rgba(212, 175, 55, 0.16);
+  border-radius: 1.25rem;
   display: grid;
   gap: 1rem;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   margin-top: 2rem;
+  padding: 1rem 1.1rem;
+}
+
+.profile-panels {
+  display: grid;
+  gap: 1.25rem;
+  grid-template-columns: minmax(0, 1.3fr) minmax(19rem, 0.7fr);
+  margin-top: 1.5rem;
+}
+
+.profile-details {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .profile-detail {
@@ -648,8 +828,19 @@ input {
   margin-top: 1.5rem;
 }
 
+.profile-proof-card,
+.profile-side-card {
+  margin-top: 1.25rem;
+  padding: 1.3rem;
+}
+
+.profile-side-card {
+  align-self: start;
+  margin-top: 0;
+}
+
 .profile-actions {
-  margin-top: 1.75rem;
+  margin-top: 1.5rem;
 }
 
 .profile-error {
@@ -657,15 +848,22 @@ input {
   margin-bottom: 0.75rem;
 }
 
+.logout-note {
+  color: var(--secondary-text);
+  margin-bottom: 0.75rem;
+}
+
 .profile-logout-button {
-  max-width: 12rem;
+  max-width: 16rem;
 }
 
 @media (max-width: 1024px) {
   .hero-grid,
   .proof-grid,
   .feature-grid,
-  .profile-details {
+  .profile-details,
+  .auth-shell,
+  .profile-panels {
     grid-template-columns: 1fr;
   }
 
@@ -675,7 +873,8 @@ input {
 
   .cta-card,
   .site-footer-inner,
-  .site-header-inner {
+  .site-header-inner,
+  .profile-topbar {
     align-items: flex-start;
     flex-direction: column;
     gap: 1rem;
@@ -690,17 +889,26 @@ input {
   .hero-actions,
   .site-nav,
   .site-footer-links,
-  .profile-links {
+  .profile-links,
+  .auth-top-links,
+  .auth-footer-links {
     width: 100%;
   }
 
   .hero-primary,
   .hero-secondary,
-  .site-nav-button {
+  .site-nav-button,
+  .demo-fill-button {
     width: 100%;
   }
 
   .hero-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .preview-credentials,
+  .demo-credentials-card,
+  .profile-status-banner {
     grid-template-columns: 1fr;
   }
 }
@@ -721,6 +929,12 @@ input {
   .cta-card,
   .auth-card,
   .profile-card {
+    padding: 1.2rem;
+  }
+
+  .auth-panel,
+  .profile-proof-card,
+  .profile-side-card {
     padding: 1.2rem;
   }
 }
