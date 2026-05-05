@@ -9,6 +9,7 @@ import {
   getExpiredAuthCookieOptions,
 } from "../../lib/authCookie";
 import { getMongoUri } from "../../lib/dbConnect";
+import { getAuthRedirectPath } from "../../proxy";
 
 test("getMongoUri prefers MONGO_URI and falls back to MONGODB_URI", () => {
   assert.equal(
@@ -60,9 +61,50 @@ test("signAuthToken and verifyAuthToken round-trip the auth payload", () => {
   assert.deepEqual(verifyAuthToken(token, env), payload);
 });
 
+test("signAuthToken requires a JWT secret", () => {
+  assert.throws(
+    () => signAuthToken({ userId: "user-123", username: "caner" }, {}),
+    /Please define the JWT_SECRET environment variable\./,
+  );
+});
+
 test("verifyAuthToken rejects invalid JWT strings", () => {
   assert.throws(
     () => verifyAuthToken("invalid-token", { JWT_SECRET: "test-secret" }),
     /Invalid token\./,
   );
+});
+
+test("getAuthRedirectPath sends anonymous profile requests to login", () => {
+  assert.equal(
+    getAuthRedirectPath({ hasToken: false, pathname: "/profile" }),
+    "/login",
+  );
+  assert.equal(
+    getAuthRedirectPath({ hasToken: false, pathname: "/profile/settings" }),
+    "/login",
+  );
+});
+
+test("getAuthRedirectPath keeps authenticated users out of guest auth pages", () => {
+  assert.equal(
+    getAuthRedirectPath({ hasToken: true, pathname: "/login" }),
+    "/profile",
+  );
+  assert.equal(
+    getAuthRedirectPath({ hasToken: true, pathname: "/signup" }),
+    "/profile",
+  );
+});
+
+test("getAuthRedirectPath allows valid route access in steady-state sessions", () => {
+  assert.equal(
+    getAuthRedirectPath({ hasToken: true, pathname: "/profile/security" }),
+    null,
+  );
+  assert.equal(
+    getAuthRedirectPath({ hasToken: false, pathname: "/login" }),
+    null,
+  );
+  assert.equal(AUTH_COOKIE_NAME, "token");
 });

@@ -12,18 +12,20 @@ nodeRequire("ts-node").register({
   transpileOnly: true,
 });
 
-const targetArg = process.argv[2];
+const targetArgs = process.argv.slice(2);
 
-if (!targetArg) {
-  console.error("A test file path is required.");
+if (targetArgs.length === 0) {
+  console.error("At least one test file path is required.");
   process.exit(1);
 }
 
-const targetPath = path.join(process.cwd(), targetArg);
+for (const targetArg of targetArgs) {
+  const targetPath = path.join(process.cwd(), targetArg);
 
-if (!fs.existsSync(targetPath)) {
-  console.error(`Test file not found: ${targetPath}`);
-  process.exit(1);
+  if (!fs.existsSync(targetPath)) {
+    console.error(`Test file not found: ${targetPath}`);
+    process.exit(1);
+  }
+
+  nodeRequire(targetPath);
 }
-
-nodeRequire(targetPath);
