@@ -2,7 +2,7 @@ import Link from "next/link";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
-import { verifyAuthToken } from "@/lib/auth";
+import { getAuthTokenState } from "@/lib/auth";
 import { AUTH_COOKIE_NAME } from "@/lib/authCookie";
 import dbConnect from "@/lib/dbConnect";
 import User from "@/models/User";
@@ -20,40 +20,63 @@ type ProfileScreenProps = {
   variant: ProfileScreenVariant;
 };
 
-async function getSessionUser(): Promise<SessionUser | null> {
-  const token = (await cookies()).get(AUTH_COOKIE_NAME)?.value;
+type SessionUserResult =
+  | { redirectPath: string; status: "redirect" }
+  | { status: "authenticated"; user: SessionUser };
 
-  if (!token) {
-    return null;
+function getSessionCleanupPath(redirectTo: string) {
+  const searchParams = new URLSearchParams({ redirectTo });
+  return `/api/session?${searchParams.toString()}`;
+}
+
+async function getSessionUser(): Promise<SessionUserResult> {
+  const token = (await cookies()).get(AUTH_COOKIE_NAME)?.value;
+  const authState = getAuthTokenState(token);
+
+  if (authState.status === "missing") {
+    return { redirectPath: "/login", status: "redirect" };
+  }
+
+  if (authState.status === "invalid") {
+    return {
+      redirectPath: getSessionCleanupPath("/login"),
+      status: "redirect",
+    };
   }
 
   try {
-    const { userId } = verifyAuthToken(token);
-
     await dbConnect();
 
-    const user = await User.findById(userId);
+    const user = await User.findById(authState.payload.userId);
 
     if (!user) {
-      return null;
+      return {
+        redirectPath: getSessionCleanupPath("/login"),
+        status: "redirect",
+      };
     }
 
     return {
-      username: user.username,
-      email: user.email,
+      status: "authenticated",
+      user: {
+        username: user.username,
+        email: user.email,
+      },
     };
   } catch (error) {
     console.error("Profile session error:", error);
-    return null;
+    throw error;
   }
 }
 
 export default async function ProfileScreen({ variant }: ProfileScreenProps) {
-  const user = await getSessionUser();
+  const session = await getSessionUser();
 
-  if (!user) {
-    redirect("/login");
+  if (session.status === "redirect") {
+    redirect(session.redirectPath);
   }
+
+  const { user } = session;
 
   const isDashboardRoute = variant === "dashboard";
   const protectedRoute = isDashboardRoute ? "/dashboard" : "/profile";
@@ -66,7 +89,7 @@ export default async function ProfileScreen({ variant }: ProfileScreenProps) {
     : `${user.username}, you are inside the protected profile.`;
   const introCopy = isDashboardRoute
     ? "This dashboard reuses the same repaired auth runtime as /profile, but presents the post-login state with the route naming the demo expects."
-    : "This is the destination both login and signup now build toward. The UI is tuned for demos, but the session is still backed by the same repaired auth flow.";
+    : "This is the canonical protected destination that both login and signup now build toward. The UI is tuned for demos, but the session is still backed by the same repaired auth flow.";
   const accountType =
     user.username === "demo" || user.username === "guest"
       ? "Seeded demo account"
@@ -145,6 +168,12 @@ export default async function ProfileScreen({ variant }: ProfileScreenProps) {
               Head back home, try another account flow, or log out to show how
               the app returns to the guest experience.
             </p>
+            {!isDashboardRoute && (
+              <p className="profile-copy">
+                Presentation path: /login to /signup to /profile, with /register and
+                /dashboard kept as compatibility aliases.
+              </p>
+            )}
             <LogoutButton />
           </aside>
         </div>
