@@ -25,8 +25,10 @@ export type AuthTokenState =
 const DEFAULT_DEMO_JWT_SECRET = "auth-mini-demo-local-jwt-secret";
 export const INVALID_AUTH_TOKEN_MESSAGE = "Invalid token.";
 export const INVALID_AUTH_REQUEST_MESSAGE = "Invalid request body.";
+export const INVALID_AUTH_EMAIL_MESSAGE = "Enter a valid email address.";
 export const MISSING_JWT_SECRET_MESSAGE =
   "JWT_SECRET must be configured in production.";
+const EMAIL_ADDRESS_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -120,6 +122,10 @@ export function normalizeAuthField(value: unknown): string | null {
 
   const trimmedValue = value.trim();
   return trimmedValue ? trimmedValue : null;
+}
+
+export function isValidEmailAddress(emailAddress: string): boolean {
+  return EMAIL_ADDRESS_PATTERN.test(emailAddress);
 }
 
 export async function readJsonBody(

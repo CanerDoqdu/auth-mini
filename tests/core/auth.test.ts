@@ -7,9 +7,11 @@ import test from "node:test";
 import {
   getAuthTokenState,
   getSafeRelativeRedirectPath,
+  INVALID_AUTH_EMAIL_MESSAGE,
   INVALID_AUTH_REQUEST_MESSAGE,
   INVALID_AUTH_TOKEN_MESSAGE,
   MISSING_JWT_SECRET_MESSAGE,
+  isValidEmailAddress,
   normalizeAuthField,
   readJsonBody,
   signAuthToken,
@@ -121,6 +123,53 @@ test("User.signup persists new local users and rejects duplicate credentials", a
   }
 });
 
+test("User.signup rejects invalid email addresses before writing to the local store", async () => {
+  const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "auth-mini-invalid-email-"));
+  const env = { AUTH_USER_STORE_FILE: path.join(tempRoot, "users.json") };
+
+  try {
+    await dbConnect(env);
+
+    await assert.rejects(
+      () => User.signup("brokenemail", "not-an-email", "secret123", env),
+      new RegExp(INVALID_AUTH_EMAIL_MESSAGE),
+    );
+  } finally {
+    fs.rmSync(tempRoot, { force: true, recursive: true });
+  }
+});
+
+test("User.signup enforces duplicate checks case-insensitively for usernames and emails", async () => {
+  const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "auth-mini-normalized-signup-"));
+  const env = { AUTH_USER_STORE_FILE: path.join(tempRoot, "users.json") };
+
+  try {
+    await dbConnect(env);
+
+    const createdUser = await User.signup(
+      "CaseUser",
+      "CaseUser@authmini.dev",
+      "secret123",
+      env,
+    );
+    const loadedUser = await User.findById(createdUser._id, env);
+
+    assert.equal(loadedUser?.username, "CaseUser");
+    assert.equal(loadedUser?.email, "caseuser@authmini.dev");
+
+    await assert.rejects(
+      () => User.signup(" caseuser ", "another@authmini.dev", "secret123", env),
+      /Username or email already exists\./,
+    );
+    await assert.rejects(
+      () => User.signup("anotheruser", " CASEUSER@authmini.dev ", "secret123", env),
+      /Username or email already exists\./,
+    );
+  } finally {
+    fs.rmSync(tempRoot, { force: true, recursive: true });
+  }
+});
+
 test("auth cookie helpers keep a consistent cookie contract", () => {
   const cookieOptions = getAuthCookieOptions(true);
 
@@ -189,6 +238,12 @@ test("normalizeAuthField trims strings and rejects non-string values", () => {
   assert.equal(normalizeAuthField("   "), null);
   assert.equal(normalizeAuthField(123), null);
   assert.equal(normalizeAuthField({ value: "demo" }), null);
+});
+
+test("isValidEmailAddress accepts normal addresses and rejects malformed input", () => {
+  assert.equal(isValidEmailAddress("demo@authmini.dev"), true);
+  assert.equal(isValidEmailAddress("not-an-email"), false);
+  assert.equal(isValidEmailAddress("demo@authmini"), false);
 });
 
 test("readJsonBody rejects malformed or non-object auth payloads", async () => {
