@@ -13,8 +13,12 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Auth Mini - Secure Authentication",
-  description: "A modern authentication system with login and signup",
+  title: {
+    default: "Auth Mini Demo",
+    template: "%s | Auth Mini Demo",
+  },
+  description:
+    "A polished authentication demo with secure signup, login, logout, and a protected profile flow.",
 };
 
 export const viewport: Viewport = {

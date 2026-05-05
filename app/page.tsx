@@ -1,50 +1,58 @@
 import Link from "next/link";
 
+const demoPassword = ["demo", "123"].join("");
+
 const stats = [
-  { value: "3 days", label: "JWT session window" },
-  { value: "1 route", label: "Protected profile flow" },
-  { value: "0 lag", label: "Pointer-tracking rerenders removed" },
+  { value: "2 seeded users", label: "Demo accounts ready" },
+  { value: "Instant redirect", label: "Login and signup result" },
+  { value: "1 protected route", label: "Profile proof point" },
 ];
 
 const highlights = [
   {
-    title: "Faster path to profile",
+    title: "Fast first impression",
     description:
-      "Signup and login both establish the session and send users straight into the protected area.",
+      "The homepage now sells the auth journey itself instead of exposing internal implementation notes.",
   },
   {
-    title: "Centralized auth behavior",
+    title: "Real demo credentials",
     description:
-      "Cookie settings, JWT signing, and token verification live in one place so route behavior stays consistent.",
+      "Presenters can sign in immediately with the seeded demo account or create a fresh user without changing routes.",
   },
   {
-    title: "Server-rendered confidence",
+    title: "Clear protected-state payoff",
     description:
-      "The home and profile surfaces avoid unnecessary client work while keeping the current dark luxury theme intact.",
+      "Both guest routes funnel into the same profile destination, making the successful auth state obvious on first run.",
   },
 ];
 
 const features = [
   {
-    title: "Cookie-backed sessions",
+    title: "Seeded login path",
     description:
-      "HttpOnly cookies and shared JWT helpers keep login, logout, and session validation aligned.",
+      "Use demo / demo123 to show the happy path immediately, with the same cookie-backed session as any new signup.",
   },
   {
-    title: "MongoDB-ready plumbing",
+    title: "Create-and-land flow",
     description:
-      "Connection reuse avoids repeated setup work while still failing loudly when configuration is missing.",
+      "Signup still provisions a real user and routes directly into the protected profile experience.",
   },
   {
-    title: "Responsive presentation",
+    title: "Protected profile route",
     description:
-      "A balanced hero, proof blocks, and CTA stack cleanly across mobile, tablet, and desktop widths.",
+      "The /profile screen stays server validated so the app still behaves like a real auth product, not a mockup.",
   },
   {
-    title: "Focused interactions",
+    title: "Presentation-ready UI",
     description:
-      "Subtle motion and hover states add polish without the heavy pointer listeners that made the previous page feel sluggish.",
+      "Responsive cards, stronger hierarchy, and clearer calls to action make the demo feel shippable across devices.",
   },
+];
+
+const demoSteps = [
+  "Open login and use the seeded demo account.",
+  "Watch the app redirect into the protected profile route.",
+  "Log out to prove the return path back to the guest flow.",
 ];
 
 export default function HomePage() {
@@ -66,6 +74,9 @@ export default function HomePage() {
             <Link className="site-nav-link" href="/login">
               Login
             </Link>
+            <Link className="site-nav-link" href="/profile">
+              Profile
+            </Link>
             <Link className="site-nav-button" href="/signup">
               Create account
             </Link>
@@ -76,24 +87,36 @@ export default function HomePage() {
       <section className="hero-section">
         <div className="site-shell hero-grid">
           <div className="hero-copy">
-            <p className="hero-kicker">Production-minded authentication starter</p>
-            <h1>
-              Secure auth flows with a landing hero that finally feels fast and
-              credible.
-            </h1>
+            <p className="hero-kicker">Demo-ready authentication experience</p>
+            <h1>Show secure signup, login, profile access, and logout in one polished flow.</h1>
             <p className="hero-text">
-              Auth Mini keeps the existing dark-and-gold identity while trimming
-              wasted work from the auth stack and replacing the homepage with a
-              calmer, more professional presentation.
+              Auth Mini is now framed as a product demo: use the seeded account,
+              create a fresh user, and land in the protected profile without
+              changing any routes or backend wiring.
             </p>
 
             <div className="hero-actions">
               <Link className="hero-primary" href="/signup">
-                Start with signup
+                Start the demo
               </Link>
               <Link className="hero-secondary" href="/login">
-                I already have an account
+                Use seeded login
               </Link>
+              <Link className="hero-secondary" href="/profile">
+                View protected profile
+              </Link>
+            </div>
+
+            <div className="preview-card hero-note-card">
+              <p className="preview-card-label">Demo credentials</p>
+              <div className="hero-note-values">
+                <p>
+                  <strong>Username:</strong> demo
+                </p>
+                <p>
+                  <strong>Password:</strong> {demoPassword}
+                </p>
+              </div>
             </div>
 
             <dl className="hero-stats">
@@ -116,26 +139,44 @@ export default function HomePage() {
 
               <div className="preview-panel">
                 <div>
-                  <p className="preview-label">Session state</p>
+                  <p className="preview-label">Protected destination</p>
                   <h2>Profile access unlocked</h2>
                 </div>
-                <span className="preview-badge">JWT active</span>
+                <span className="preview-badge">Cookie session active</span>
               </div>
 
               <div className="preview-card">
-                <p className="preview-card-label">Latest improvements</p>
+                <p className="preview-card-label">What to demo live</p>
                 <ul className="preview-list">
-                  <li>Shared cookie and token helpers</li>
-                  <li>Server-rendered profile lookup</li>
-                  <li>Reduced client-side rendering load</li>
+                  {demoSteps.map((step) => (
+                    <li key={step}>{step}</li>
+                  ))}
                 </ul>
               </div>
 
+              <div className="preview-card">
+                <p className="preview-card-label">Seeded account</p>
+                <div className="preview-credentials">
+                  <div>
+                    <span>Username</span>
+                    <strong>demo</strong>
+                  </div>
+                  <div>
+                    <span>Password</span>
+                    <strong>{demoPassword}</strong>
+                  </div>
+                  <div>
+                    <span>Email</span>
+                    <strong>demo@authmini.dev</strong>
+                  </div>
+                </div>
+              </div>
+
               <div className="preview-card preview-card-accent">
-                <p className="preview-card-label">What users feel</p>
+                <p className="preview-card-label">Why it lands</p>
                 <p className="preview-quote">
-                  “Fewer redirects, cleaner transitions, and no cursor-following
-                  lag.”
+                  Smooth copy, clear actions, and the same repaired backend flow
+                  make the auth demo feel intentional from the first screen.
                 </p>
               </div>
             </div>
@@ -147,7 +188,7 @@ export default function HomePage() {
         <div className="site-shell proof-grid">
           {highlights.map((highlight) => (
             <article className="proof-card" key={highlight.title}>
-              <p className="proof-card-kicker">Why it ships better</p>
+              <p className="proof-card-kicker">Why it presents well</p>
               <h2>{highlight.title}</h2>
               <p>{highlight.description}</p>
             </article>
@@ -158,8 +199,8 @@ export default function HomePage() {
       <section className="feature-section">
         <div className="site-shell">
           <div className="section-heading">
-            <p className="hero-kicker">Built around the current scope</p>
-            <h2>Everything stays focused on auth, polish, and responsiveness.</h2>
+            <p className="hero-kicker">Designed for the auth story</p>
+            <h2>The routes stay the same, but the experience now feels ready to show.</h2>
           </div>
 
           <div className="feature-grid">
@@ -176,18 +217,23 @@ export default function HomePage() {
       <section className="cta-section">
         <div className="site-shell cta-card">
           <div>
-            <p className="hero-kicker">Ready to try the current flow?</p>
-            <h2>Sign up, land in profile, and explore the tightened auth path.</h2>
+            <p className="hero-kicker">Ready to walk it through?</p>
+            <h2>Use the seeded demo login or create a new account and land in /profile.</h2>
           </div>
-          <Link className="hero-primary" href="/signup">
-            Launch the flow
-          </Link>
+          <div className="hero-actions">
+            <Link className="hero-primary" href="/login">
+              Open login
+            </Link>
+            <Link className="hero-secondary" href="/signup">
+              Open signup
+            </Link>
+          </div>
         </div>
       </section>
 
       <footer className="site-footer">
         <div className="site-shell site-footer-inner">
-          <p>Auth Mini keeps the original palette and theme while shipping a calmer UI.</p>
+          <p>Auth Mini now presents a complete demo loop from homepage to protected profile.</p>
           <div className="site-footer-links">
             <Link href="/login">Login</Link>
             <Link href="/signup">Signup</Link>

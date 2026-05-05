@@ -32,6 +32,7 @@ export default function LogoutButton() {
 
   return (
     <div className="profile-actions">
+      <p className="logout-note">Clear the auth cookie and return to the login route.</p>
       {error ? <p className="profile-error">{error}</p> : null}
       <button
         className="submit-btn profile-logout-button"
@@ -39,7 +40,7 @@ export default function LogoutButton() {
         onClick={handleLogout}
         type="button"
       >
-        {logoutLoading ? "Logging out..." : "Logout"}
+        {logoutLoading ? "Clearing session..." : "Log out securely"}
       </button>
     </div>
   );
