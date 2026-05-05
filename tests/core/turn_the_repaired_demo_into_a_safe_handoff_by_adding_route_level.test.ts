@@ -41,6 +41,7 @@ const invalidPassword = ["wrong", "password"].join("-");
 const presenterUsername = ["pre", "senter"].join("");
 const presenterPassword = ["secret", "123"].join("");
 const presenterEmail = ["presenter", "authmini.dev"].join("@");
+const paddedPresenterPassword = ["  ", presenterPassword, "  "].join("");
 
 function getProjectPath(pathSegments: string[]): string {
   return path.join(process.cwd(), ...pathSegments);
@@ -336,6 +337,62 @@ test("login and session routes reject invalid credentials and stale tokens", asy
     assert.deepEqual(await unsafeRedirectResponse.json(), {
       authenticated: false,
       message: "Invalid token.",
+    });
+  });
+});
+
+test("signup and login routes preserve exact passwords that include surrounding spaces", async () => {
+  await withDemoEnv(async () => {
+    const exactUsername = ["space", "route"].join("");
+    const exactEmail = [exactUsername, "authmini.dev"].join("@");
+    const { POST: signup } = loadProjectModule<{
+      POST: (request: Request) => Promise<Response>;
+    }>(["app", "api", "signup", "route.ts"]);
+    const { POST: login } = loadProjectModule<{
+      POST: (request: Request) => Promise<Response>;
+    }>(["app", "api", "login", "route.ts"]);
+
+    const signupResponse = await signup(
+      new Request("http://localhost:3000/api/signup", {
+        body: JSON.stringify({
+          email: exactEmail,
+          password: paddedPresenterPassword,
+          username: exactUsername,
+        }),
+        headers: { "Content-Type": "application/json" },
+        method: "POST",
+      }),
+    );
+
+    assert.equal(signupResponse.status, 201);
+
+    const exactLoginResponse = await login(
+      new Request("http://localhost:3000/api/login", {
+        body: JSON.stringify({
+          password: paddedPresenterPassword,
+          username: exactUsername,
+        }),
+        headers: { "Content-Type": "application/json" },
+        method: "POST",
+      }),
+    );
+
+    assert.equal(exactLoginResponse.status, 200);
+
+    const trimmedLoginResponse = await login(
+      new Request("http://localhost:3000/api/login", {
+        body: JSON.stringify({
+          password: presenterPassword,
+          username: exactUsername,
+        }),
+        headers: { "Content-Type": "application/json" },
+        method: "POST",
+      }),
+    );
+
+    assert.equal(trimmedLoginResponse.status, 401);
+    assert.deepEqual(await trimmedLoginResponse.json(), {
+      message: "Invalid username or password",
     });
   });
 });

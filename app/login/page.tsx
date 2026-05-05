@@ -43,15 +43,15 @@ export default function LoginPage() {
 
   const errors: Record<string, string> = {};
   const usernameTrimmed = username.trim();
-  const passwordTrimmed = password.trim();
+  const passwordIsBlank = !password.trim();
 
   if (touched.username && !usernameTrimmed) errors.username = "Username is required";
-  if (touched.password && !passwordTrimmed) errors.password = "Password is required";
+  if (touched.password && passwordIsBlank) errors.password = "Password is required";
 
   const isSubmitDisabled =
     loading ||
     !usernameTrimmed ||
-    !passwordTrimmed ||
+    passwordIsBlank ||
     Object.keys(errors).length > 0;
 
   function handleUseDemoAccount() {
@@ -79,7 +79,7 @@ export default function LoginPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           username: usernameTrimmed,
-          password: passwordTrimmed,
+          password,
         }),
       });
 

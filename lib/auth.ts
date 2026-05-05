@@ -124,6 +124,14 @@ export function normalizeAuthField(value: unknown): string | null {
   return trimmedValue ? trimmedValue : null;
 }
 
+export function normalizePasswordField(value: unknown): string | null {
+  if (typeof value !== "string") {
+    return null;
+  }
+
+  return value.trim() ? value : null;
+}
+
 export function isValidEmailAddress(emailAddress: string): boolean {
   return EMAIL_ADDRESS_PATTERN.test(emailAddress);
 }

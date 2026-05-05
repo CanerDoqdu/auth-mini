@@ -83,15 +83,15 @@ export default function SignupScreen({ variant }: SignupScreenProps) {
   const errors: Record<string, string> = {};
   const usernameTrimmed = username.trim();
   const emailTrimmed = email.trim().toLowerCase();
-  const passwordTrimmed = password.trim();
+  const passwordIsBlank = !password.trim();
 
   if (touched.username && !usernameTrimmed) errors.username = "Username is required";
   if (touched.email && !emailTrimmed) errors.email = "Email is required";
   if (touched.email && emailTrimmed && !validateEmail(emailTrimmed)) {
     errors.email = "Invalid email format";
   }
-  if (touched.password && !passwordTrimmed) errors.password = "Password is required";
-  if (touched.password && passwordTrimmed && !validatePassword(passwordTrimmed)) {
+  if (touched.password && passwordIsBlank) errors.password = "Password is required";
+  if (touched.password && !passwordIsBlank && !validatePassword(password)) {
     errors.password = "Password must be at least 6 characters";
   }
 
@@ -99,7 +99,7 @@ export default function SignupScreen({ variant }: SignupScreenProps) {
     loading ||
     !usernameTrimmed ||
     !emailTrimmed ||
-    !passwordTrimmed ||
+    passwordIsBlank ||
     Object.keys(errors).length > 0;
 
   async function handleSubmit(e: React.FormEvent) {
@@ -121,7 +121,7 @@ export default function SignupScreen({ variant }: SignupScreenProps) {
         body: JSON.stringify({
           username: usernameTrimmed,
           email: emailTrimmed,
-          password: passwordTrimmed,
+          password,
         }),
       });
 
