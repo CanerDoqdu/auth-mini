@@ -9,6 +9,7 @@
     "lint": "eslint",
     "test": "node tests/run-tests.mjs",
     "test:auth": "npm test -- tests/core/auth.test.ts",
+    "test:auth-current-smoke": "npm test -- tests/core/run_the_current_repo_s_lint_build_auth_smoke_path_first_capture_.test.ts",
     "test:auth-runtime-smoke": "npm test -- tests/core/run_the_existing_repo_s_lint_build_and_auth_smoke_coverage_captu.test.ts",
     "test:demo-handoff": "npm test -- tests/core/finalize_regression_protection_and_presenter_facing_docs_so_the_.test.ts",
     "test:demo-ui": "npm test -- tests/core/demo-ui.test.ts",

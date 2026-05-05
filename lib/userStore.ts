@@ -54,6 +54,33 @@ function cloneUsers(users: IUser[]): IUser[] {
   return users.map(cloneUser);
 }
 
+function isStoredUser(value: unknown): value is IUser {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) {
+    return false;
+  }
+
+  const candidate = value as Partial<IUser>;
+
+  return (
+    typeof candidate._id === "string" &&
+    typeof candidate.username === "string" &&
+    typeof candidate.email === "string" &&
+    typeof candidate.password === "string" &&
+    typeof candidate.createdAt === "string" &&
+    typeof candidate.updatedAt === "string"
+  );
+}
+
+function sanitizeStoredUsers(users: unknown[]): IUser[] {
+  const validUsers = users.filter(isStoredUser);
+
+  if (validUsers.length !== users.length) {
+    console.error("User store format error: ignoring malformed persisted user records.");
+  }
+
+  return cloneUsers(validUsers);
+}
+
 function getUsernameLookupKey(username: string): string {
   return username.trim().toLowerCase();
 }
@@ -142,7 +169,17 @@ async function readUserStore(
   try {
     const fileContents = await fs.readFile(storeFilePath, "utf8");
     const parsed = JSON.parse(fileContents) as Partial<UserStoreData>;
-    const users = Array.isArray(parsed.users) ? parsed.users : [];
+    const rawUsers = parsed.users;
+
+    if (!Array.isArray(rawUsers)) {
+      if (rawUsers !== undefined) {
+        console.error("User store format error: users must be an array.");
+      }
+
+      return { users: [] };
+    }
+
+    const users = sanitizeStoredUsers(rawUsers);
 
     return { users };
   } catch (error) {
