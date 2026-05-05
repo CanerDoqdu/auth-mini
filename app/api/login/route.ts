@@ -1,13 +1,19 @@
 import dbConnect from "@/lib/dbConnect";
-import { applyAuthCookie, signAuthToken } from "@/lib/auth";
+import {
+  applyAuthCookie,
+  isInvalidAuthRequestError,
+  normalizeAuthField,
+  readJsonBody,
+  signAuthToken,
+} from "@/lib/auth";
 import User from "@/models/User";
 import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
   try {
-    const { username, password } = await request.json();
-    const usernameTrimmed = username?.trim();
-    const passwordTrimmed = password?.trim();
+    const body = await readJsonBody(request, "Login");
+    const usernameTrimmed = normalizeAuthField(body.username);
+    const passwordTrimmed = normalizeAuthField(body.password);
 
     if (!usernameTrimmed || !passwordTrimmed) {
       return NextResponse.json(
@@ -31,14 +37,22 @@ export async function POST(request: Request) {
 
     return applyAuthCookie(response, token);
   } catch (error) {
-    const err = error as Error;
     console.error("Login error:", error);
 
     const status =
-      err.message === "Invalid username or password" ? 401 : 500;
+      error instanceof Error && error.message === "Invalid username or password"
+        ? 401
+        : isInvalidAuthRequestError(error)
+          ? 400
+          : 500;
+    const message = isInvalidAuthRequestError(error)
+      ? error.message
+      : error instanceof Error
+        ? error.message
+        : "Unable to log in right now.";
 
     return NextResponse.json(
-      { message: err.message || "Unable to log in right now." },
+      { message },
       { status },
     );
   }

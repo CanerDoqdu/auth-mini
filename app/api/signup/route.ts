@@ -1,14 +1,21 @@
 import dbConnect from "@/lib/dbConnect";
-import { applyAuthCookie, signAuthToken } from "@/lib/auth";
+import {
+  applyAuthCookie,
+  isInvalidAuthRequestError,
+  normalizeAuthField,
+  readJsonBody,
+  signAuthToken,
+} from "@/lib/auth";
 import User from "@/models/User";
 import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
   try {
-    const { username, email, password } = await request.json();
-    const usernameTrimmed = username?.trim();
-    const emailTrimmed = email?.trim().toLowerCase();
-    const passwordTrimmed = password?.trim();
+    const body = await readJsonBody(request, "Signup");
+    const usernameTrimmed = normalizeAuthField(body.username);
+    const emailValue = normalizeAuthField(body.email);
+    const emailTrimmed = emailValue?.toLowerCase() ?? null;
+    const passwordTrimmed = normalizeAuthField(body.password);
 
     if (!usernameTrimmed || !emailTrimmed || !passwordTrimmed) {
       return NextResponse.json(
@@ -26,7 +33,11 @@ export async function POST(request: Request) {
 
     await dbConnect();
 
-    const newUser = await User.signup(usernameTrimmed, emailTrimmed, passwordTrimmed);
+    const newUser = await User.signup(
+      usernameTrimmed,
+      emailTrimmed,
+      passwordTrimmed,
+    );
 
     const token = signAuthToken({
       userId: String(newUser._id),
@@ -40,13 +51,22 @@ export async function POST(request: Request) {
 
     return applyAuthCookie(response, token);
   } catch (error) {
-    const err = error as Error;
     console.error("Signup error:", error);
-    const message = err.message === "Username or email already exists."
-      ? "Username or email already exists."
-      : err.message || "An error occurred during signup.";
+    const message =
+      isInvalidAuthRequestError(error)
+        ? error.message
+        : error instanceof Error &&
+            error.message === "Username or email already exists."
+          ? "Username or email already exists."
+          : error instanceof Error
+            ? error.message
+            : "An error occurred during signup.";
 
-    const status = message === "Username or email already exists." ? 400 : 500;
+    const status =
+      message === "Username or email already exists." ||
+      isInvalidAuthRequestError(error)
+        ? 400
+        : 500;
 
     return NextResponse.json(
       { message },

@@ -24,9 +24,26 @@ export type AuthTokenState =
 
 const DEFAULT_DEMO_JWT_SECRET = "auth-mini-demo-local-jwt-secret";
 export const INVALID_AUTH_TOKEN_MESSAGE = "Invalid token.";
+export const INVALID_AUTH_REQUEST_MESSAGE = "Invalid request body.";
+export const MISSING_JWT_SECRET_MESSAGE =
+  "JWT_SECRET must be configured in production.";
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
+}
 
 function getJwtSecret(env: NodeJS.ProcessEnv = process.env) {
-  return env.JWT_SECRET || DEFAULT_DEMO_JWT_SECRET;
+  const configuredSecret = env.JWT_SECRET?.trim();
+
+  if (configuredSecret) {
+    return configuredSecret;
+  }
+
+  if (env.NODE_ENV === "production") {
+    throw new Error(MISSING_JWT_SECRET_MESSAGE);
+  }
+
+  return DEFAULT_DEMO_JWT_SECRET;
 }
 
 export function signAuthToken(
@@ -76,6 +93,44 @@ export function isInvalidAuthTokenError(error: unknown): error is Error {
   );
 }
 
+export function isInvalidAuthRequestError(error: unknown): error is Error {
+  return (
+    error instanceof Error && error.message === INVALID_AUTH_REQUEST_MESSAGE
+  );
+}
+
+export function normalizeAuthField(value: unknown): string | null {
+  if (typeof value !== "string") {
+    return null;
+  }
+
+  const trimmedValue = value.trim();
+  return trimmedValue ? trimmedValue : null;
+}
+
+export async function readJsonBody(
+  request: Request,
+  routeName: string,
+): Promise<Record<string, unknown>> {
+  try {
+    const parsedBody: unknown = await request.json();
+
+    if (!isRecord(parsedBody)) {
+      console.error(`${routeName} request parsing error: body must be an object.`);
+      throw new Error(INVALID_AUTH_REQUEST_MESSAGE);
+    }
+
+    return parsedBody;
+  } catch (error) {
+    if (isInvalidAuthRequestError(error)) {
+      throw error;
+    }
+
+    console.error(`${routeName} request parsing error:`, error);
+    throw new Error(INVALID_AUTH_REQUEST_MESSAGE);
+  }
+}
+
 export function getAuthTokenState(
   token: string | undefined,
   env: NodeJS.ProcessEnv = process.env,
@@ -95,6 +150,34 @@ export function getAuthTokenState(
     }
 
     throw error;
+  }
+}
+
+export function getSafeRelativeRedirectPath(
+  redirectTo: string | null | undefined,
+): string | null {
+  if (
+    !redirectTo ||
+    !redirectTo.startsWith("/") ||
+    redirectTo.startsWith("//") ||
+    redirectTo.includes("\\") ||
+    /[\r\n]/.test(redirectTo) ||
+    /%0d|%0a/i.test(redirectTo)
+  ) {
+    return null;
+  }
+
+  try {
+    const parsedRedirect = new URL(redirectTo, "http://localhost");
+
+    if (parsedRedirect.origin !== "http://localhost") {
+      return null;
+    }
+
+    return `${parsedRedirect.pathname}${parsedRedirect.search}${parsedRedirect.hash}`;
+  } catch (error) {
+    console.error("Redirect parsing error:", error);
+    return null;
   }
 }
 
