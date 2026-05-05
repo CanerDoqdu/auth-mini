@@ -6,7 +6,12 @@ import test from "node:test";
 
 import {
   getAuthTokenState,
+  getSafeRelativeRedirectPath,
+  INVALID_AUTH_REQUEST_MESSAGE,
   INVALID_AUTH_TOKEN_MESSAGE,
+  MISSING_JWT_SECRET_MESSAGE,
+  normalizeAuthField,
+  readJsonBody,
   signAuthToken,
   verifyAuthToken,
 } from "../../lib/auth";
@@ -129,9 +134,19 @@ test("signAuthToken and verifyAuthToken round-trip the auth payload", () => {
 
 test("signAuthToken falls back to the demo JWT secret when none is configured", () => {
   const payload = { userId: "user-123", username: "caner" };
-  const token = signAuthToken(payload, {});
+  const env = { NODE_ENV: "development" };
+  const token = signAuthToken(payload, env);
 
-  assert.deepEqual(verifyAuthToken(token, {}), payload);
+  assert.deepEqual(verifyAuthToken(token, env), payload);
+});
+
+test("signAuthToken requires an explicit JWT secret in production", () => {
+  const payload = { userId: "user-123", username: "caner" };
+
+  assert.throws(
+    () => signAuthToken(payload, { NODE_ENV: "production" }),
+    new RegExp(MISSING_JWT_SECRET_MESSAGE),
+  );
 });
 
 test("verifyAuthToken rejects invalid JWT strings", () => {
@@ -152,6 +167,55 @@ test("getAuthTokenState distinguishes missing invalid and authenticated tokens",
     payload,
     status: "authenticated",
   });
+});
+
+test("normalizeAuthField trims strings and rejects non-string values", () => {
+  assert.equal(normalizeAuthField("  demo  "), "demo");
+  assert.equal(normalizeAuthField("   "), null);
+  assert.equal(normalizeAuthField(123), null);
+  assert.equal(normalizeAuthField({ value: "demo" }), null);
+});
+
+test("readJsonBody rejects malformed or non-object auth payloads", async () => {
+  await assert.rejects(
+    () =>
+      readJsonBody(
+        new Request("http://localhost:3000/api/login", {
+          body: JSON.stringify(["demo"]),
+          headers: { "Content-Type": "application/json" },
+          method: "POST",
+        }),
+        "Login",
+      ),
+    new RegExp(INVALID_AUTH_REQUEST_MESSAGE),
+  );
+
+  await assert.rejects(
+    () =>
+      readJsonBody(
+        new Request("http://localhost:3000/api/login", {
+          body: "{",
+          headers: { "Content-Type": "application/json" },
+          method: "POST",
+        }),
+        "Login",
+      ),
+    new RegExp(INVALID_AUTH_REQUEST_MESSAGE),
+  );
+});
+
+test("getSafeRelativeRedirectPath accepts same-origin relative paths only", () => {
+  assert.equal(getSafeRelativeRedirectPath("/login"), "/login");
+  assert.equal(
+    getSafeRelativeRedirectPath("/profile?tab=security#password"),
+    "/profile?tab=security#password",
+  );
+  assert.equal(getSafeRelativeRedirectPath("//evil.example/login"), null);
+  assert.equal(getSafeRelativeRedirectPath("https://evil.example/login"), null);
+  assert.equal(getSafeRelativeRedirectPath("/\\evil.example"), null);
+  assert.equal(getSafeRelativeRedirectPath("/profile%0d%0aX-Test: injected"), null);
+  assert.equal(getSafeRelativeRedirectPath("login"), null);
+  assert.equal(getSafeRelativeRedirectPath(null), null);
 });
 
 test("getAuthRedirectPath sends unauthenticated profile requests to login", () => {

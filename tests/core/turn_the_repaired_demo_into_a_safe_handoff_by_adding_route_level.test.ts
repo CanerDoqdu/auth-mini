@@ -281,6 +281,9 @@ test("login and session routes reject invalid credentials and stale tokens", asy
     const invalidSessionRedirectResponse = await getSession(
       new Request("http://localhost:3000/api/session?redirectTo=%2Flogin"),
     );
+    const unsafeRedirectResponse = await getSession(
+      new Request("http://localhost:3000/api/session?redirectTo=%2F%2Fevil.example"),
+    );
 
     assert.equal(invalidSessionResponse.status, 401);
     assert.deepEqual(await invalidSessionResponse.json(), {
@@ -301,6 +304,51 @@ test("login and session routes reject invalid credentials and stale tokens", asy
       getSetCookieHeader(invalidSessionRedirectResponse),
       /Expires=Thu, 01 Jan 1970 00:00:00 GMT/i,
     );
+
+    assert.equal(unsafeRedirectResponse.status, 401);
+    assert.equal(unsafeRedirectResponse.headers.get("location"), null);
+    assert.deepEqual(await unsafeRedirectResponse.json(), {
+      authenticated: false,
+      message: "Invalid token.",
+    });
+  });
+});
+
+test("login and signup routes reject malformed request bodies", async () => {
+  await withDemoEnv(async () => {
+    const { POST: login } = loadProjectModule<{
+      POST: (request: Request) => Promise<Response>;
+    }>(["app", "api", "login", "route.ts"]);
+    const { POST: signup } = loadProjectModule<{
+      POST: (request: Request) => Promise<Response>;
+    }>(["app", "api", "signup", "route.ts"]);
+
+    const malformedLoginResponse = await login(
+      new Request("http://localhost:3000/api/login", {
+        body: JSON.stringify(["demo"]),
+        headers: { "Content-Type": "application/json" },
+        method: "POST",
+      }),
+    );
+    const malformedSignupResponse = await signup(
+      new Request("http://localhost:3000/api/signup", {
+        body: "{",
+        headers: { "Content-Type": "application/json" },
+        method: "POST",
+      }),
+    );
+
+    assert.equal(malformedLoginResponse.status, 400);
+    assert.deepEqual(await malformedLoginResponse.json(), {
+      message: "Invalid request body.",
+    });
+    assert.equal(malformedLoginResponse.headers.get("set-cookie"), null);
+
+    assert.equal(malformedSignupResponse.status, 400);
+    assert.deepEqual(await malformedSignupResponse.json(), {
+      message: "Invalid request body.",
+    });
+    assert.equal(malformedSignupResponse.headers.get("set-cookie"), null);
   });
 });
 

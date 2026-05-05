@@ -1,4 +1,8 @@
-import { clearAuthCookie, getAuthTokenState } from "@/lib/auth";
+import {
+  clearAuthCookie,
+  getAuthTokenState,
+  getSafeRelativeRedirectPath,
+} from "@/lib/auth";
 import { AUTH_COOKIE_NAME } from "@/lib/authCookie";
 import dbConnect from "@/lib/dbConnect";
 import User from "@/models/User";
@@ -6,13 +10,9 @@ import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 
 function getSessionRedirectTarget(request: Request) {
-  const redirectTo = new URL(request.url).searchParams.get("redirectTo");
-
-  if (!redirectTo || !redirectTo.startsWith("/")) {
-    return null;
-  }
-
-  return redirectTo;
+  return getSafeRelativeRedirectPath(
+    new URL(request.url).searchParams.get("redirectTo"),
+  );
 }
 
 function createSessionFailureResponse({
