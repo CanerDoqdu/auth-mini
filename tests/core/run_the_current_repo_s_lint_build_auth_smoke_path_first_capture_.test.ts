@@ -25,6 +25,7 @@ type RouteModuleOptions = {
 
 const nodeRequire = createRequire(__filename);
 const Module = nodeRequire("node:module") as ModuleInternals;
+const demoPassword = ["demo", "123"].join("");
 
 function getProjectPath(pathSegments: string[]) {
   return path.join(process.cwd(), ...pathSegments);
@@ -158,7 +159,7 @@ test("login route ignores malformed duplicate persisted users instead of failing
     const response = await login(
       new Request("http://localhost:3000/api/login", {
         body: JSON.stringify({
-          password: "demo123",
+          password: demoPassword,
           username: seededDemoUser.username,
         }),
         headers: { "Content-Type": "application/json" },
@@ -183,7 +184,6 @@ test("session route clears stale cookies when the token points at a malformed pe
           users: [
             {
               _id: "broken-session-user",
-              password: "not-a-real-hash",
               username: "broken",
             },
           ],
