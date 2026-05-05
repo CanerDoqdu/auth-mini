@@ -321,9 +321,24 @@ test("proxy enforces guest and authenticated route access at the route level", (
       headers: { cookie: `${AUTH_COOKIE_NAME}=${validToken}` },
     }),
   );
+  const authenticatedSignupResponse = proxy(
+    new NextRequest("http://localhost:3000/signup", {
+      headers: { cookie: `${AUTH_COOKIE_NAME}=${validToken}` },
+    }),
+  );
+  const authenticatedRegisterResponse = proxy(
+    new NextRequest("http://localhost:3000/register", {
+      headers: { cookie: `${AUTH_COOKIE_NAME}=${validToken}` },
+    }),
+  );
   const steadyStateProfileResponse = proxy(
     new NextRequest("http://localhost:3000/profile", {
       headers: { cookie: `${AUTH_COOKIE_NAME}=${validToken}` },
+    }),
+  );
+  const invalidProtectedResponse = proxy(
+    new NextRequest("http://localhost:3000/profile", {
+      headers: { cookie: `${AUTH_COOKIE_NAME}=invalid-token` },
     }),
   );
   const invalidGuestResponse = proxy(
@@ -343,10 +358,30 @@ test("proxy enforces guest and authenticated route access at the route level", (
     authenticatedLoginResponse.headers.get("location"),
     "http://localhost:3000/profile",
   );
+  assert.equal(authenticatedSignupResponse.status, 307);
+  assert.equal(
+    authenticatedSignupResponse.headers.get("location"),
+    "http://localhost:3000/profile",
+  );
+  assert.equal(authenticatedRegisterResponse.status, 307);
+  assert.equal(
+    authenticatedRegisterResponse.headers.get("location"),
+    "http://localhost:3000/profile",
+  );
 
   assert.equal(steadyStateProfileResponse.status, 200);
   assert.equal(steadyStateProfileResponse.headers.get("location"), null);
   assert.equal(steadyStateProfileResponse.headers.get("x-middleware-next"), "1");
+
+  assert.equal(invalidProtectedResponse.status, 307);
+  assert.equal(
+    invalidProtectedResponse.headers.get("location"),
+    "http://localhost:3000/login",
+  );
+  assert.match(
+    invalidProtectedResponse.headers.get("set-cookie") ?? "",
+    /Expires=Thu, 01 Jan 1970 00:00:00 GMT/i,
+  );
 
   assert.equal(invalidGuestResponse.status, 200);
   assert.equal(invalidGuestResponse.headers.get("location"), null);

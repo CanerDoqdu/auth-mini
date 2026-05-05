@@ -198,6 +198,10 @@ test("getAuthRedirectPath allows valid route access in steady-state sessions", (
     null,
   );
   assert.equal(
+    getAuthRedirectPath({ authState: "invalid", pathname: "/register" }),
+    null,
+  );
+  assert.equal(
     getAuthRedirectPath({ authState: "authenticated", pathname: "/dashboard" }),
     null,
   );
