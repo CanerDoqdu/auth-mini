@@ -1,18 +1,36 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useRef, useEffect } from "react";
 
 export default function HomePage() {
-  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+  const cursorLightRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    const cursorLight = cursorLightRef.current;
+    if (!cursorLight) return;
+
+    let mouseX = 0;
+    let mouseY = 0;
+    let animationFrameId: number;
+
     const handleMouseMove = (e: MouseEvent) => {
-      setMousePos({ x: e.clientX, y: e.clientY });
+      mouseX = e.clientX;
+      mouseY = e.clientY;
+
+      if (!animationFrameId) {
+        animationFrameId = requestAnimationFrame(() => {
+          cursorLight.style.transform = `translate(${mouseX}px, ${mouseY}px) translate(-50%, -50%)`;
+          animationFrameId = 0;
+        });
+      }
     };
 
     window.addEventListener("mousemove", handleMouseMove);
-    return () => window.removeEventListener("mousemove", handleMouseMove);
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      if (animationFrameId) cancelAnimationFrame(animationFrameId);
+    };
   }, []);
 
   return (
@@ -26,11 +44,8 @@ export default function HomePage() {
 
       {/* Cursor Light */}
       <div
+        ref={cursorLightRef}
         className="cursor-light"
-        style={{
-          left: `${mousePos.x}px`,
-          top: `${mousePos.y}px`,
-        }}
       ></div>
 
       {/* Navigation */}
