@@ -65,39 +65,45 @@ export default function HomePage() {
 
       {/* Hero Section */}
       <section className="hero">
-        <div className="hero-content">
-          <div className="hero-text">
+        <div className="hero-container">
+          {/* Left Side - Text & Form */}
+          <div className="hero-left">
             <h1 className="hero-title">
-              Modern <span className="gradient-text">Authentication</span>
-              <br /> Redefined
+              Secure <span className="gradient-text">Authentication</span>
             </h1>
-            <p className="hero-subtitle">
-              Experience a seamless, beautiful, and secure authentication system
-              built with cutting-edge technology. Your gateway to a modern web.
+            <p className="hero-description">
+              Fast, secure, and beautiful authentication system built for modern web applications. Enterprise-grade security with JWT tokens and bcrypt hashing. Your gateway to seamless user experience.
             </p>
-            <div className="hero-buttons">
-              <Link href="/signup" className="btn btn-primary">
-                <span>Get Started</span>
-                <span className="btn-icon">→</span>
-              </Link>
-              <Link href="/login" className="btn btn-secondary">
-                Already have account
-              </Link>
+            
+            <div className="hero-form">
+              <input 
+                type="email" 
+                placeholder="Enter your email" 
+                className="hero-input"
+              />
+              <button className="hero-form-btn">Get Started</button>
+            </div>
+
+            <div className="hero-stats">
+              <div className="stat">
+                <div className="stat-value">99.9%</div>
+                <div className="stat-label">Uptime</div>
+              </div>
+              <div className="stat">
+                <div className="stat-value">256-bit</div>
+                <div className="stat-label">Encryption</div>
+              </div>
+              <div className="stat">
+                <div className="stat-value">⭐⭐⭐⭐⭐</div>
+                <div className="stat-label">5.0 Rating</div>
+              </div>
             </div>
           </div>
 
-          <div className="hero-visual">
-            <div className="floating-card card-1">
-              <div className="card-icon">🔐</div>
-              <p>Secure</p>
-            </div>
-            <div className="floating-card card-2">
-              <div className="card-icon">⚡</div>
-              <p>Fast</p>
-            </div>
-            <div className="floating-card card-3">
-              <div className="card-icon">✨</div>
-              <p>Beautiful</p>
+          {/* Right Side - Visual */}
+          <div className="hero-right">
+            <div className="hero-visual-placeholder">
+              🔐
             </div>
           </div>
         </div>
